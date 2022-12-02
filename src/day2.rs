@@ -74,15 +74,12 @@ pub fn solve_part1(file_content: &str) -> u32 {
 }
 
 fn restore_your_move(opponent: Choice, outcome: Outcome) -> Choice {
-    match (opponent, outcome) {
-        (Choice::Rock, Outcome::Win) => Choice::Paper,
-        (Choice::Rock, Outcome::Loss) => Choice::Scissors,
-        (Choice::Paper, Outcome::Win) => Choice::Scissors,
-        (Choice::Paper, Outcome::Loss) => Choice::Rock,
-        (Choice::Scissors, Outcome::Win) => Choice::Rock,
-        (Choice::Scissors, Outcome::Loss) => Choice::Paper,
-        _ => opponent,
+    for my_choice in vec![Choice::Rock, Choice::Paper, Choice::Scissors] {
+        if play(opponent, my_choice) == outcome {
+            return my_choice;
+        }
     }
+    unreachable!("No move found")
 }
 
 pub fn solve_part2(file_content: &str) -> u32 {
