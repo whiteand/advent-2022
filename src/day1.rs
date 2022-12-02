@@ -19,18 +19,26 @@ pub fn solve_part1(file_content: &str) -> u32 {
 }
 
 pub fn solve_part2(file_content: &str) -> u32 {
-    let (a, b, c): (u32, u32, u32) =
-        parse_elfes_calories(file_content).fold((0, 0, 0), |(a, b, c), calories| {
-            if calories <= c {
-                (a, b, c)
-            } else if calories <= b {
-                (a, b, calories)
-            } else if calories <= a {
-                (a, calories, b)
-            } else {
-                (calories, a, b)
-            }
-        });
+    let mut a = 0;
+    let mut b = 0;
+    let mut c = 0;
+
+    for elf in parse_elfes_calories(file_content) {
+        if elf <= c {
+            continue;
+        }
+        if elf <= b {
+            c = elf;
+        } else if elf <= a {
+            c = b;
+            b = elf;
+        } else {
+            c = b;
+            b = a;
+            a = elf;
+        }
+    }
+
     return a + b + c;
 }
 
