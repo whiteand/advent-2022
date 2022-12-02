@@ -1,28 +1,23 @@
-use std::iter;
+use crate::split_by::SplitByTrait;
 
-fn parse_elfes_calories<'a>(file_content: &'a str) -> impl Iterator<Item = i32> + 'a {
+fn parse_elfes_calories<'a>(file_content: &'a str) -> impl Iterator<Item = u32> + 'a {
     file_content
         .lines()
         .map(|line| line.trim())
-        .chain(iter::once(""))
-        .scan(0, |state, line| {
-            if line == "" {
-                let res = *state;
-                *state = 0;
-                return Some(Some(res));
-            }
-            let calories = line.parse::<i32>().unwrap();
-            *state += calories;
-            Some(None)
+        .split_by(|line| line.is_empty())
+        .map(|lines| {
+            lines
+                .into_iter()
+                .map(|line| line.parse::<u32>().unwrap())
+                .sum()
         })
-        .flat_map(|x| x)
 }
 
-pub fn solve_part1(file_content: &str) -> i32 {
+pub fn solve_part1(file_content: &str) -> u32 {
     parse_elfes_calories(file_content).max().unwrap_or_default()
 }
 
-pub fn solve_part2(file_content: &str) -> i32 {
+pub fn solve_part2(file_content: &str) -> u32 {
     let mut elfes: Vec<_> = parse_elfes_calories(file_content).collect();
 
     elfes.sort_by(|a, b| b.cmp(a));
@@ -49,12 +44,10 @@ mod tests {
     
     10000";
 
-    #[ignore]
     #[test]
     fn test_part1() {
         assert_eq!(solve_part1(INPUT), 24000);
     }
-    #[ignore]
     #[test]
     fn test_part2() {
         assert_eq!(solve_part2(INPUT), 45000);
