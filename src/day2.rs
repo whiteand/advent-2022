@@ -5,18 +5,16 @@ enum Choice {
     Scissors = 3,
 }
 
-impl TryFrom<char> for Choice {
-    type Error = ();
-
-    fn try_from(value: char) -> Result<Self, Self::Error> {
+impl From<char> for Choice {
+    fn from(value: char) -> Self {
         match value {
-            'A' => Ok(Choice::Rock),
-            'B' => Ok(Choice::Paper),
-            'C' => Ok(Choice::Scissors),
-            'X' => Ok(Choice::Rock),
-            'Y' => Ok(Choice::Paper),
-            'Z' => Ok(Choice::Scissors),
-            _ => Err(()),
+            'A' => Choice::Rock,
+            'B' => Choice::Paper,
+            'C' => Choice::Scissors,
+            'X' => Choice::Rock,
+            'Y' => Choice::Paper,
+            'Z' => Choice::Scissors,
+            _ => unreachable!(),
         }
     }
 }
@@ -57,53 +55,42 @@ fn get_score((a, b): (Choice, Choice)) -> u32 {
     play(a, b) as u32 + b as u32
 }
 
-pub fn solve_part1(file_content: &str) -> u32 {
-    let games = file_content.lines().map(|line| -> (Choice, Choice) {
+fn parse_char_pairs(input: &str) -> impl Iterator<Item = (char, char)> + '_ {
+    input.lines().map(|line| {
         let mut chars = line.chars();
         let first_char = chars.next().unwrap();
         chars.next();
         let second_char = chars.next().unwrap();
 
-        (
-            first_char.try_into().unwrap(),
-            second_char.try_into().unwrap(),
-        )
-    });
-    let scores = games.map(get_score);
+        (first_char, second_char)
+    })
+}
 
-    scores.sum::<u32>()
+pub fn solve_part1(file_content: &str) -> u32 {
+    parse_char_pairs(file_content)
+        .map(|(a, b)| (a.into(), b.into()))
+        .map(get_score)
+        .sum::<u32>()
+}
+
+fn restore_your_move(opponent: Choice, outcome: Outcome) -> Choice {
+    match (opponent, outcome) {
+        (Choice::Rock, Outcome::Win) => Choice::Paper,
+        (Choice::Rock, Outcome::Loss) => Choice::Scissors,
+        (Choice::Paper, Outcome::Win) => Choice::Scissors,
+        (Choice::Paper, Outcome::Loss) => Choice::Rock,
+        (Choice::Scissors, Outcome::Win) => Choice::Rock,
+        (Choice::Scissors, Outcome::Loss) => Choice::Paper,
+        _ => opponent,
+    }
 }
 
 pub fn solve_part2(file_content: &str) -> u32 {
-    let games = file_content.lines().map(|line| -> (Choice, Outcome) {
-        let mut chars = line.chars();
-        let first_char = chars.next().unwrap();
-        chars.next();
-        let second_char = chars.next().unwrap();
-
-        (
-            first_char.try_into().unwrap(),
-            second_char.try_into().unwrap(),
-        )
-    });
-    let scores = games
-        .map(|(opponent, outcome)| -> (Choice, Choice) {
-            (
-                opponent,
-                match (opponent, outcome) {
-                    (Choice::Rock, Outcome::Win) => Choice::Paper,
-                    (Choice::Rock, Outcome::Loss) => Choice::Scissors,
-                    (Choice::Paper, Outcome::Win) => Choice::Scissors,
-                    (Choice::Paper, Outcome::Loss) => Choice::Rock,
-                    (Choice::Scissors, Outcome::Win) => Choice::Rock,
-                    (Choice::Scissors, Outcome::Loss) => Choice::Paper,
-                    _ => opponent,
-                },
-            )
-        })
-        .map(get_score);
-
-    scores.sum::<u32>()
+    parse_char_pairs(file_content)
+        .map(|(a, b)| (a.into(), b.into()))
+        .map(|(opponent, outcome)| (opponent, restore_your_move(opponent, outcome)))
+        .map(get_score)
+        .sum()
 }
 
 #[cfg(test)]
