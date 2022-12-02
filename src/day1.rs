@@ -1,15 +1,16 @@
-use crate::split_by::SplitByTrait;
+use crate::reduces::Reduces;
 
 fn parse_elfes_calories<'a>(file_content: &'a str) -> impl Iterator<Item = u32> + 'a {
     file_content
         .lines()
         .map(|line| line.trim())
-        .split_by(|line| line.is_empty())
-        .map(|lines| {
-            lines
-                .into_iter()
-                .map(|line| line.parse::<u32>().unwrap())
-                .sum()
+        .reduces(0, |elf_group, line| {
+            if line.len() <= 0 {
+                return false;
+            }
+            *elf_group = *elf_group + line.parse::<u32>().unwrap();
+
+            return true;
         })
 }
 

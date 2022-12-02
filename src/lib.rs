@@ -1,3 +1,3 @@
 pub mod day1;
 pub mod day2;
-pub mod split_by;
+pub mod reduces;
