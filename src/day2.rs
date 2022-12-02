@@ -1,5 +1,3 @@
-use std::cmp::Ordering;
-
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 enum Choice {
     Rock = 1,
@@ -23,18 +21,17 @@ impl TryFrom<char> for Choice {
     }
 }
 
-impl PartialOrd for Choice {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        use Choice::*;
-        match (self, other) {
-            (Rock, Paper) => Some(Ordering::Less),
-            (Rock, Scissors) => Some(Ordering::Greater),
-            (Paper, Rock) => Some(Ordering::Greater),
-            (Paper, Scissors) => Some(Ordering::Less),
-            (Scissors, Rock) => Some(Ordering::Less),
-            (Scissors, Paper) => Some(Ordering::Greater),
-            _ => Some(Ordering::Equal),
-        }
+fn play(opponent: Choice, my_choice: Choice) -> Outcome {
+    match (opponent, my_choice) {
+        (Choice::Rock, Choice::Rock) => Outcome::Draw,
+        (Choice::Rock, Choice::Paper) => Outcome::Win,
+        (Choice::Rock, Choice::Scissors) => Outcome::Loss,
+        (Choice::Paper, Choice::Rock) => Outcome::Loss,
+        (Choice::Paper, Choice::Paper) => Outcome::Draw,
+        (Choice::Paper, Choice::Scissors) => Outcome::Win,
+        (Choice::Scissors, Choice::Rock) => Outcome::Win,
+        (Choice::Scissors, Choice::Paper) => Outcome::Loss,
+        (Choice::Scissors, Choice::Scissors) => Outcome::Draw,
     }
 }
 
@@ -56,19 +53,8 @@ impl From<char> for Outcome {
     }
 }
 
-impl From<(Choice, Choice)> for Outcome {
-    fn from((a, b): (Choice, Choice)) -> Self {
-        match a.partial_cmp(&b) {
-            Some(Ordering::Greater) => Outcome::Loss,
-            Some(Ordering::Less) => Outcome::Win,
-            Some(Ordering::Equal) => Outcome::Draw,
-            None => unreachable!(),
-        }
-    }
-}
-
 fn get_score((a, b): (Choice, Choice)) -> u32 {
-    Outcome::from((a, b)) as u32 + b as u32
+    play(a, b) as u32 + b as u32
 }
 
 pub fn solve_part1(file_content: &str) -> u32 {
