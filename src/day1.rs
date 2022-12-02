@@ -19,7 +19,7 @@ fn parse_elfes_calories<'a>(file_content: &'a str) -> impl Iterator<Item = i32> 
 }
 
 pub fn solve_part1(file_content: &str) -> i32 {
-    parse_elfes_calories(file_content).max().unwrap()
+    parse_elfes_calories(file_content).max().unwrap_or_default()
 }
 
 pub fn solve_part2(file_content: &str) -> i32 {
