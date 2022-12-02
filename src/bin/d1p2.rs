@@ -7,5 +7,5 @@ fn main() {
     let file_content = read_to_string(path_to_input).unwrap();
     let s = solve_part2(&file_content);
 
-    println!("{s:?}");
+    println!("Sum of top 3 calories loads: {s:?}");
 }
