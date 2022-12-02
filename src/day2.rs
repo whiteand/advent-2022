@@ -21,15 +21,13 @@ impl From<char> for Choice {
 
 fn play(opponent: Choice, my_choice: Choice) -> Outcome {
     match (opponent, my_choice) {
-        (Choice::Rock, Choice::Rock) => Outcome::Draw,
         (Choice::Rock, Choice::Paper) => Outcome::Win,
         (Choice::Rock, Choice::Scissors) => Outcome::Loss,
         (Choice::Paper, Choice::Rock) => Outcome::Loss,
-        (Choice::Paper, Choice::Paper) => Outcome::Draw,
         (Choice::Paper, Choice::Scissors) => Outcome::Win,
         (Choice::Scissors, Choice::Rock) => Outcome::Win,
         (Choice::Scissors, Choice::Paper) => Outcome::Loss,
-        (Choice::Scissors, Choice::Scissors) => Outcome::Draw,
+        _ => Outcome::Draw,
     }
 }
 
