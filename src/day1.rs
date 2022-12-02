@@ -1,10 +1,21 @@
+use std::iter;
+
 fn parse_elfes_calories<'a>(file_content: &'a str) -> impl Iterator<Item = i32> + 'a {
-    file_content.split("\n\n").map(|single_str| {
-        single_str
-            .lines()
-            .map(|x| x.trim().parse::<i32>().unwrap())
-            .sum::<i32>()
-    })
+    file_content
+        .lines()
+        .map(|line| line.trim())
+        .chain(iter::once(""))
+        .scan(0, |state, line| {
+            if line == "" {
+                let res = *state;
+                *state = 0;
+                return Some(Some(res));
+            }
+            let calories = line.parse::<i32>().unwrap();
+            *state += calories;
+            Some(None)
+        })
+        .flat_map(|x| x)
 }
 
 pub fn solve_part1(file_content: &str) -> i32 {
@@ -12,7 +23,7 @@ pub fn solve_part1(file_content: &str) -> i32 {
 }
 
 pub fn solve_part2(file_content: &str) -> i32 {
-    let mut elfes: Vec<i32> = parse_elfes_calories(file_content).collect();
+    let mut elfes: Vec<_> = parse_elfes_calories(file_content).collect();
 
     elfes.sort_by(|a, b| b.cmp(a));
 
@@ -23,7 +34,20 @@ pub fn solve_part2(file_content: &str) -> i32 {
 mod tests {
     use super::*;
 
-    const INPUT: &str = "1000\n2000\n3000\n\n4000\n\n5000\n6000\n\n7000\n8000\n9000\n\n10000";
+    const INPUT: &str = "1000
+    2000
+    3000
+    
+    4000
+    
+    5000
+    6000
+    
+    7000
+    8000
+    9000
+    
+    10000";
 
     #[test]
     fn test_part1() {
