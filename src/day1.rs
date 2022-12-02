@@ -1,26 +1,18 @@
+fn parse_elfes_calories<'a>(file_content: &'a str) -> impl Iterator<Item = i32> + 'a {
+    file_content.split("\n\n").map(|single_str| {
+        single_str
+            .lines()
+            .map(|x| x.trim().parse::<i32>().unwrap())
+            .sum::<i32>()
+    })
+}
+
 pub fn solve_part1(file_content: &str) -> i32 {
-    file_content
-        .split("\n\n")
-        .map(|single_str| {
-            single_str
-                .lines()
-                .map(|x| x.trim().parse::<i32>().unwrap())
-                .sum::<i32>()
-        })
-        .max()
-        .unwrap()
+    parse_elfes_calories(file_content).max().unwrap()
 }
 
 pub fn solve_part2(file_content: &str) -> i32 {
-    let mut elfes: Vec<i32> = file_content
-        .split("\n\n")
-        .map(|single_str| {
-            single_str
-                .lines()
-                .map(|x| x.trim().parse::<i32>().unwrap())
-                .sum::<i32>()
-        })
-        .collect();
+    let mut elfes: Vec<i32> = parse_elfes_calories(file_content).collect();
 
     elfes.sort_by(|a, b| b.cmp(a));
 
