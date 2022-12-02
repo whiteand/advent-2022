@@ -19,11 +19,19 @@ pub fn solve_part1(file_content: &str) -> u32 {
 }
 
 pub fn solve_part2(file_content: &str) -> u32 {
-    let mut elfes: Vec<_> = parse_elfes_calories(file_content).collect();
-
-    elfes.sort_by(|a, b| b.cmp(a));
-
-    elfes.iter().take(3).sum()
+    let (a, b, c): (u32, u32, u32) =
+        parse_elfes_calories(file_content).fold((0, 0, 0), |(a, b, c), calories| {
+            if calories <= c {
+                (a, b, c)
+            } else if calories <= b {
+                (a, b, calories)
+            } else if calories <= a {
+                (a, calories, b)
+            } else {
+                (calories, a, b)
+            }
+        });
+    return a + b + c;
 }
 
 #[cfg(test)]
