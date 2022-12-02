@@ -19,27 +19,27 @@ pub fn solve_part1(file_content: &str) -> u32 {
 }
 
 pub fn solve_part2(file_content: &str) -> u32 {
-    let mut a = 0;
-    let mut b = 0;
-    let mut c = 0;
+    let mut top1 = 0;
+    let mut top2 = 0;
+    let mut top3 = 0;
 
     for elf in parse_elfes_calories(file_content) {
-        if elf <= c {
+        if elf <= top3 {
             continue;
         }
-        if elf <= b {
-            c = elf;
-        } else if elf <= a {
-            c = b;
-            b = elf;
+        if elf <= top2 {
+            top3 = elf;
+        } else if elf <= top1 {
+            top3 = top2;
+            top2 = elf;
         } else {
-            c = b;
-            b = a;
-            a = elf;
+            top3 = top2;
+            top2 = top1;
+            top1 = elf;
         }
     }
 
-    return a + b + c;
+    return top1 + top2 + top3;
 }
 
 #[cfg(test)]
