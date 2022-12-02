@@ -94,10 +94,12 @@ mod tests {
 
     const INPUT: &str = "A Y\nB X\nC Z";
 
+    #[ignore]
     #[test]
     fn test_part1() {
         assert_eq!(solve_part1(INPUT), 15);
     }
+    #[ignore]
     #[test]
     fn test_part2() {
         assert_eq!(solve_part2(INPUT), 12);
