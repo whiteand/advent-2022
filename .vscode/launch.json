@@ -7,16 +7,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'advent_2022'",
+            "name": "Debug unit tests in library 'advent'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=advent_2022"
+                    "--package=advent"
                 ],
                 "filter": {
-                    "name": "advent_2022",
+                    "name": "advent",
                     "kind": "lib"
                 }
             },
@@ -31,7 +31,7 @@
                 "args": [
                     "build",
                     "--bin=d1p1",
-                    "--package=advent_2022"
+                    "--package=advent"
                 ],
                 "filter": {
                     "name": "d1p1",
@@ -50,7 +50,7 @@
                     "test",
                     "--no-run",
                     "--bin=d1p1",
-                    "--package=advent_2022"
+                    "--package=advent"
                 ],
                 "filter": {
                     "name": "d1p1",
@@ -68,7 +68,7 @@
                 "args": [
                     "build",
                     "--bin=d1p2",
-                    "--package=advent_2022"
+                    "--package=advent"
                 ],
                 "filter": {
                     "name": "d1p2",
@@ -87,7 +87,7 @@
                     "test",
                     "--no-run",
                     "--bin=d1p2",
-                    "--package=advent_2022"
+                    "--package=advent"
                 ],
                 "filter": {
                     "name": "d1p2",
@@ -105,7 +105,7 @@
                 "args": [
                     "build",
                     "--bin=d2p1",
-                    "--package=advent_2022"
+                    "--package=advent"
                 ],
                 "filter": {
                     "name": "d2p1",
@@ -124,7 +124,7 @@
                     "test",
                     "--no-run",
                     "--bin=d2p1",
-                    "--package=advent_2022"
+                    "--package=advent"
                 ],
                 "filter": {
                     "name": "d2p1",

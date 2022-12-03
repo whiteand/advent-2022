@@ -1,6 +1,6 @@
 use std::{env::args, fs::read_to_string};
 
-use advent_2022::day2::solve_part2;
+use advent::day2::solve_part2;
 
 fn main() {
     let path_to_input = args().skip(1).next().unwrap();
