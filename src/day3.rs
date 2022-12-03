@@ -61,7 +61,7 @@ pub fn solve_part2(file_content: &str) -> u32 {
         let first = first.unwrap();
         let second = lines.next().unwrap();
         let third = lines.next().unwrap();
-        let group: Vec<&[char]> = vec![&first, &second, &third];
+        let group: [&[char]; 3] = [&first, &second, &third];
         score += calculate_score(&group);
     }
 
