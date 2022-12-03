@@ -5,10 +5,10 @@ fn parse_lines(input: &str) -> impl Iterator<Item = Vec<char>> + '_ {
     });
 }
 
-fn get_value(char: char) -> u32 {
+fn get_value(char: char) -> usize {
     match char {
-        'a'..='z' => char as u32 - 'a' as u32 + 1,
-        'A'..='Z' => char as u32 - 'A' as u32 + 27,
+        'a'..='z' => char as usize - 'a' as usize + 1,
+        'A'..='Z' => char as usize - 'A' as usize + 27,
         _ => 0,
     }
 }
@@ -21,26 +21,26 @@ fn calculate_score(parts: &[&[char]]) -> u32 {
         added_to_count.fill(false);
         for char in part.iter() {
             let value = get_value(*char);
-            if added_to_count[value as usize] {
+            if added_to_count[value] {
                 continue;
             }
-            count[value as usize] += 1;
-            added_to_count[value as usize] = true;
+            count[value] += 1;
+            added_to_count[value] = true;
         }
     }
 
     let mut added_to_score = [false; 53];
     for char in parts[parts.len() - 1] {
         let value = get_value(*char);
-        if added_to_score[value as usize] {
+        if added_to_score[value] {
             continue;
         }
-        if count[value as usize] >= parts.len() - 1 {
-            added_to_score[value as usize] = true;
+        if count[value] >= parts.len() - 1 {
+            added_to_score[value] = true;
             score += value;
         }
     }
-    score
+    score as u32
 }
 
 pub fn solve_part1(file_content: &str) -> u32 {
