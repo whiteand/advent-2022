@@ -13,29 +13,41 @@ fn get_value(char: char) -> u32 {
     }
 }
 
+fn calculate_score(parts: &[&[char]]) -> u32 {
+    let mut score = 0;
+    let mut count = [0; 53];
+    let mut added_to_count = [false; 53];
+    for part in &parts[0..parts.len() - 1] {
+        added_to_count.fill(false);
+        for char in part.iter() {
+            let value = get_value(*char);
+            if added_to_count[value as usize] {
+                continue;
+            }
+            count[value as usize] += 1;
+            added_to_count[value as usize] = true;
+        }
+    }
+
+    let mut added_to_score = [false; 53];
+    for char in parts[parts.len() - 1] {
+        let value = get_value(*char);
+        if added_to_score[value as usize] {
+            continue;
+        }
+        if count[value as usize] >= parts.len() - 1 {
+            added_to_score[value as usize] = true;
+            score += value;
+        }
+    }
+    score
+}
+
 pub fn solve_part1(file_content: &str) -> u32 {
     let mut res = 0;
-    let mut present = [false; 53];
-    let mut added = [false; 53];
     for line in parse_lines(file_content) {
-        present.fill(false);
-        added.fill(false);
-        let second_start = line.len() / 2;
-        for (i, char) in line.into_iter().enumerate() {
-            let value = get_value(char);
-            if i < second_start {
-                present[value as usize] = true;
-                continue;
-            }
-            if !present[value as usize] {
-                continue;
-            }
-            if added[value as usize] {
-                continue;
-            }
-            res += value;
-            added[value as usize] = true;
-        }
+        let compartments = vec![&line[..line.len() / 2], &line[line.len() / 2..]];
+        res += calculate_score(&compartments);
     }
     res
 }
@@ -43,37 +55,17 @@ pub fn solve_part1(file_content: &str) -> u32 {
 pub fn solve_part2(file_content: &str) -> u32 {
     let mut score = 0;
 
-    let mut added_to_score = [false; 53];
-    let mut added_to_count = [false; 53];
-    let mut count = [0; 53];
-    for (line_index, line) in parse_lines(file_content).enumerate() {
-        if line_index % 3 == 0 {
-            added_to_score.fill(false);
-            count.fill(0);
+    let mut lines = parse_lines(file_content);
+    loop {
+        let first = lines.next();
+        if first.is_none() {
+            break;
         }
-        if line_index % 3 == 2 {
-            for char in line {
-                let value = get_value(char);
-                let cnt = count[value as usize];
-                if cnt >= 2 {
-                    if added_to_score[value as usize] {
-                        continue;
-                    }
-                    score += value;
-                    added_to_score[value as usize] = true;
-                }
-            }
-            continue;
-        }
-        added_to_count.fill(false);
-        for char in line {
-            let value = get_value(char);
-            if added_to_count[value as usize] {
-                continue;
-            }
-            added_to_count[value as usize] = true;
-            count[value as usize] += 1;
-        }
+        let first = first.unwrap();
+        let second = lines.next().unwrap();
+        let third = lines.next().unwrap();
+        let group: Vec<&[char]> = vec![&first, &second, &third];
+        score += calculate_score(&group);
     }
 
     score
