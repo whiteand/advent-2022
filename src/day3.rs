@@ -43,7 +43,7 @@ fn calculate_score(parts: &[&[char]]) -> u32 {
 pub fn solve_part1(file_content: &str) -> u32 {
     let mut res = 0;
     for line in parse_lines(file_content) {
-        let compartments = vec![&line[..line.len() / 2], &line[line.len() / 2..]];
+        let compartments = [&line[..line.len() / 2], &line[line.len() / 2..]];
         res += calculate_score(&compartments);
     }
     res
