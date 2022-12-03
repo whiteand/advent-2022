@@ -1,8 +1,5 @@
 fn parse_lines(input: &str) -> impl Iterator<Item = Vec<char>> + '_ {
-    return input.lines().map(|line| {
-        let chars = line.chars().collect::<Vec<_>>();
-        chars
-    });
+    return input.lines().map(|line| line.chars().collect::<Vec<_>>());
 }
 
 fn get_value(char: char) -> usize {
