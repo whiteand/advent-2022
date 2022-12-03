@@ -72,6 +72,7 @@ pub fn solve_part2(file_content: &str) -> u32 {
 mod tests {
     use super::*;
 
+    #[ignore]
     #[test]
     fn test_value() {
         assert_eq!(get_value('a'), 1);
@@ -90,10 +91,13 @@ wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
 ttgJtRGJQctTZtZT
 CrZsJsPPZsGzwwsLwLmpwMDw";
 
+    #[ignore]
     #[test]
     fn test_part1() {
         assert_eq!(solve_part1(INPUT), 157);
     }
+
+    #[ignore]
     #[test]
     fn test_part2() {
         assert_eq!(solve_part2(INPUT), 70);
