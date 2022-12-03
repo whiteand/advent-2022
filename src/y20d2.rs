@@ -99,10 +99,12 @@ mod tests {
     const INPUT: &str = "1-3 a: abcde
 1-3 b: cdefg
 2-9 c: ccccccccc";
+    #[ignore]
     #[test]
     fn test_task1() {
         assert_eq!(format!("{}", solve_task1(INPUT)), "2");
     }
+    #[ignore]
     #[test]
     fn test_task2() {
         assert_eq!(format!("{}", solve_task2(INPUT)), "1");
