@@ -19,16 +19,21 @@ pub fn solve_task1(file_content: &str) -> impl std::fmt::Display {
     }
     return 0;
 }
+// Right answer: 51810360
+// Iterations: 977104
 pub fn solve_task2(file_content: &str) -> impl std::fmt::Display {
     let nums = parse_nums_list(file_content).collect::<Vec<_>>();
     let n = nums.len();
+    let mut iter = 0;
     for i in 0..n - 2 {
         for j in (i + 1)..(n - 1) {
             for k in (j + 1)..n {
+                iter += 1;
                 let a = nums[i];
                 let b = nums[j];
                 let c = nums[k];
                 if a + b + c == 2020 {
+                    dbg!(iter);
                     return a * b * c;
                 }
             }

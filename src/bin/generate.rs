@@ -74,7 +74,6 @@ fn generate(year: u32, day: u32, tasks: u32) {
 
     {
         let mut modules = get_modules(global_library_path);
-        println!("{modules:?}");
         let module_name = format!("y{}d{}", year % 2000, day);
         if !modules.contains(&module_name) {
             modules.push(module_name);
@@ -140,7 +139,6 @@ fn get_lib_content(modules: &[String]) -> String {
 fn get_modules(global_library_path: &Path) -> Vec<String> {
     let content = fs::read_to_string(global_library_path).unwrap();
     let mut res: Vec<String> = Vec::new();
-    println!("{content}");
     let modules_regex = Regex::new(r"mod (\w+);").unwrap();
     for line in content.lines() {
         if let Some(captures) = modules_regex.captures(line) {
