@@ -22,13 +22,7 @@ impl Range {
 
     #[inline]
     fn overlaps(&self, other: &Range) -> bool {
-        if self.start > other.end {
-            return false;
-        }
-        if self.end < other.start {
-            return false;
-        }
-        return true;
+        self.start <= other.end && self.end >= other.start
     }
 }
 
