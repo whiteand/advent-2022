@@ -1,5 +1,7 @@
 use std::str::FromStr;
 
+use nom::IResult;
+
 fn parse_next<'a, T, U>(x: &mut T) -> U
 where
     T: Iterator<Item = &'a str>,
@@ -10,8 +12,8 @@ where
 }
 
 struct Range {
-    start: usize,
-    end: usize,
+    start: u32,
+    end: u32,
 }
 
 impl Range {
@@ -59,10 +61,25 @@ impl FromStr for Pair {
     }
 }
 
+fn parse_range(line: &str) -> IResult<&str, Range> {
+    let (input, start) = nom::character::complete::u32(line)?;
+    let (input, _) = nom::bytes::complete::tag("-")(input)?;
+    let (input, end) = nom::character::complete::u32(input)?;
+    return Ok((input, Range { start, end }));
+}
+
+fn parse_pair(line: &str) -> IResult<&str, Pair> {
+    let (input, first) = parse_range(line)?;
+    let (input, _) = nom::bytes::complete::tag(",")(input)?;
+    let (input, second) = parse_range(input)?;
+
+    Ok((input, Pair(first, second)))
+}
+
 fn solve(file_content: &str, predicate: impl Fn(&Pair) -> bool) -> usize {
     file_content
         .lines()
-        .map(|line| line.parse().unwrap())
+        .map(|line| parse_pair(line).unwrap().1)
         .filter(predicate)
         .count()
 }
@@ -74,7 +91,6 @@ pub fn solve_task1(file_content: &str) -> usize {
 pub fn solve_task2(file_content: &str) -> usize {
     solve(file_content, Pair::has_overlaps)
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -85,13 +101,11 @@ mod tests {
 6-6,4-6
 2-6,4-8";
 
-    #[ignore]
     #[test]
     fn test_task1() {
         assert_eq!(format!("{}", solve_task1(INPUT)), "2");
     }
 
-    #[ignore]
     #[test]
     fn test_task2() {
         assert_eq!(format!("{}", solve_task2(INPUT)), "4");
