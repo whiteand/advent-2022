@@ -85,11 +85,13 @@ mod tests {
 6-6,4-6
 2-6,4-8";
 
+    #[ignore]
     #[test]
     fn test_task1() {
         assert_eq!(format!("{}", solve_task1(INPUT)), "2");
     }
 
+    #[ignore]
     #[test]
     fn test_task2() {
         assert_eq!(format!("{}", solve_task2(INPUT)), "4");

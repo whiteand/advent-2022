@@ -51,11 +51,13 @@ mod tests {
 675
 1456";
     #[test]
+    #[ignore]
     fn test_task1() {
         assert_eq!(format!("{}", solve_task1(INPUT)), "514579");
     }
 
     #[test]
+    #[ignore]
     fn test_task2() {
         assert_eq!(format!("{}", solve_task2(INPUT)), "241861950");
     }
