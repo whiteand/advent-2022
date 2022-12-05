@@ -13,3 +13,7 @@ regex="1"
 [[bench]]
 name = "y22d4"
 harness = false
+
+[[bench]]
+name = "y22d5"
+harness = false
