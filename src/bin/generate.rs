@@ -1,6 +1,7 @@
 use std::{
+    fmt::Write,
     fs,
-    io::{self, Write},
+    io::{self},
     path::Path,
     str::FromStr,
 };
@@ -10,7 +11,7 @@ use regex::Regex;
 fn read_line(request: &str) -> String {
     if request.len() > 0 {
         print!("{}", request);
-        io::stdout().flush().unwrap();
+        std::io::Write::flush(&mut io::stdout()).unwrap();
     }
     let mut res = String::new();
     io::stdin()
@@ -51,6 +52,8 @@ fn main() {
 }
 
 fn generate(year: u32, day: u32, tasks: u32) {
+    generate_bench(year, day, tasks);
+
     let global_library_path = Path::new("src/lib.rs");
     let day_lib_path = format!("src/y{}d{}.rs", year % 2000, day);
     let day_lib_path = Path::new(&day_lib_path);
@@ -162,4 +165,69 @@ fn main() {{
 }}
 "
     )
+}
+
+fn generate_bench(year: u32, day: u32, tasks: u32) {
+    let bench_name = format!("y{}d{}", year % 2000, day);
+    add_bench_to_toml(&bench_name);
+    let input_file_name = format!("benches/{bench_name}.txt");
+    fs::write(&input_file_name, "").unwrap();
+    let rs_file_content = get_bench_code(year, day, tasks);
+    let rs_file_path = format!("benches/{bench_name}.rs");
+    fs::write(&rs_file_path, rs_file_content).unwrap();
+}
+
+fn add_bench_to_toml(bench_name: &str) {
+    let mut content = fs::read_to_string("./Cargo.toml").unwrap();
+    let new_bench = format!("\n\n[[bench]]\nname = \"{bench_name}\"\nharness = false");
+    content.push_str(&new_bench);
+    fs::write("Cargo.toml", content).unwrap();
+}
+
+fn get_bench_code(year: u32, day: u32, tasks: u32) -> String {
+    let mut res = String::new();
+    writeln!(&mut res, "use std::fs;").unwrap();
+    let lib = format!("y{}d{}", year % 2000, day);
+    write!(&mut res, "use advent::{lib}::{{",).unwrap();
+    for task in 1..=tasks {
+        if task > 1 {
+            write!(&mut res, ", ").unwrap();
+        }
+        write!(&mut res, "solve_task{task}").unwrap();
+    }
+    writeln!(&mut res, "}};").unwrap();
+    writeln!(
+        &mut res,
+        "use criterion::{{black_box, criterion_group, criterion_main, Criterion}};\n"
+    )
+    .unwrap();
+    writeln!(&mut res, "pub fn criterion_benchmark(c: &mut Criterion) {{").unwrap();
+    writeln!(
+        &mut res,
+        "    let content = fs::read_to_string(\"./benches/{lib}.txt\").unwrap();"
+    )
+    .unwrap();
+    for task in 1..=tasks {
+        writeln!(&mut res,
+        "    c.bench_function(\"solve {task}\", |b| b.iter(|| solve_task{task}(black_box(&content))));"
+    )
+        .unwrap();
+    }
+    writeln!(&mut res, "}}\n").unwrap();
+    writeln!(&mut res, "criterion_group!(benches, criterion_benchmark);").unwrap();
+    writeln!(&mut res, "criterion_main!(benches);").unwrap();
+    res
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[ignore]
+    #[test]
+    fn test_get_gench_code() {
+        let res = get_bench_code(2022, 26, 2);
+        println!("Output:\n---\n{res}\n---\n");
+        assert_eq!("abc", res.as_str())
+    }
 }
