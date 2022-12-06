@@ -30,7 +30,6 @@ fn solve<const N: usize>(file_content: &str) -> usize {
         if cnt[c] == 2 {
             dublicates += 1;
         }
-
         // at this point all invariants are preserved
 
         if dublicates == 0 {
@@ -50,6 +49,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[ignore]
     fn test_task1() {
         assert_eq!(format!("{}", solve_task1("abcd")), "4");
         assert_eq!(
@@ -71,6 +71,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn test_task2() {
         assert_eq!(
             format!("{}", solve_task2("mjqjpqmgbljsphdztnvjfqwrcgsmlb")),
