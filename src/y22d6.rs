@@ -1,30 +1,30 @@
-fn all_different<const N: usize>(arr: &[char; N]) -> bool {
-    for i in 0..(N - 1) {
-        for j in (i + 1)..N {
-            if arr[i] == arr[j] {
-                return false;
-            }
+fn solve<const N: usize>(file_content: &str) -> usize {
+    let chars = file_content.as_bytes();
+    let mut cnt = [0 as usize; 256];
+    let mut dublicates = 0;
+    for &c in &chars[..N] {
+        cnt[c as usize] += 1;
+        if cnt[c as usize] == 2 {
+            dublicates += 1;
         }
     }
-    true
-}
-
-fn solve<const N: usize>(file_content: &str) -> usize {
-    let mut enumerate_chars = file_content.chars().enumerate();
-    let mut last: [char; N] = [0 as char; N];
-    for i in 0..N {
-        last[i] = enumerate_chars.next().unwrap().1;
-    }
-    if all_different(&last) {
+    if dublicates <= 0 {
         return N;
     }
-    for (i, c) in enumerate_chars {
-        for j in 0..(N - 1) {
-            last[j] = last[j + 1];
+
+    for (i, &x) in chars[N..].iter().enumerate() {
+        let c = x as usize;
+        let goes_outside_c = chars[i] as usize;
+        cnt[goes_outside_c] -= 1;
+        if cnt[goes_outside_c] == 1 {
+            dublicates -= 1;
         }
-        last[N - 1] = c;
-        if all_different(&last) {
-            return i + 1;
+        cnt[c] += 1;
+        if cnt[c] == 2 {
+            dublicates += 1;
+        }
+        if dublicates == 0 {
+            return i + N + 1;
         }
     }
     0
@@ -41,6 +41,7 @@ mod tests {
 
     #[test]
     fn test_task1() {
+        assert_eq!(format!("{}", solve_task1("abcd")), "4");
         assert_eq!(
             format!("{}", solve_task1("bvwbjplbgvbhsrlpgdmjqwftvncz")),
             "5"
