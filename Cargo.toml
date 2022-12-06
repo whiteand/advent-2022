@@ -17,3 +17,7 @@ harness = false
 [[bench]]
 name = "y22d5"
 harness = false
+
+[[bench]]
+name = "y22d6"
+harness = false
