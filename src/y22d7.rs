@@ -1,4 +1,4 @@
-use std::{array::IntoIter, iter::Peekable, path::Iter, thread::current};
+use std::iter::Peekable;
 
 use nom::{
     branch, bytes,
