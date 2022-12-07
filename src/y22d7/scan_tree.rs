@@ -1,10 +1,7 @@
 use super::io::ChangeDirArgument;
-
 use super::io::Node;
-
-use super::tree::Tree;
-
 use super::io::IO;
+use super::tree::Tree;
 
 pub(crate) fn scan_tree<'input>(ios: impl Iterator<Item = IO<'input>>) -> Tree<'input> {
     let mut tree = Tree::default();
