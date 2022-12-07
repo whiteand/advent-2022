@@ -1,15 +1,17 @@
 mod io;
 mod parse;
-mod scan_tree;
 mod tree;
 
-use self::parse::parse_io;
+use self::{parse::parse_io, tree::Tree};
+
+fn file_content_to_tree(file_content: &str) -> Tree {
+    parse_io(file_content).collect()
+}
 
 // 1581595
 pub fn solve_task1(file_content: &str) -> usize {
-    let tree = scan_tree::scan_tree(parse_io(file_content));
-
-    tree.into_iter()
+    file_content_to_tree(file_content)
+        .into_iter()
         .filter_map(|x| {
             if !x.is_dir() {
                 return None;
@@ -24,8 +26,8 @@ pub fn solve_task1(file_content: &str) -> usize {
 }
 
 // 1544176
-pub fn solve_task2(file_content: &str) -> impl std::fmt::Display {
-    let tree = scan_tree::scan_tree(parse_io(file_content));
+pub fn solve_task2(file_content: &str) -> usize {
+    let tree = file_content_to_tree(file_content);
 
     const TOTAL: usize = 70000000;
     const REQUIRED: usize = 30000000;
