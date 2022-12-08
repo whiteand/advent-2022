@@ -99,7 +99,7 @@ fn get_score(grid: &Vec<Vec<u8>>, row: usize, col: usize) -> usize {
     top * right * bottom * left
 }
 // 371200
-pub fn solve_task2(file_content: &str) -> impl std::fmt::Display {
+pub fn solve_task2(file_content: &str) -> usize {
     let grid = parse_grid(file_content);
     let mut res = 0;
     for (row, line) in grid.iter().enumerate() {
