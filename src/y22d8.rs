@@ -8,25 +8,91 @@ fn parse_grid(file_content: &str) -> Vec<Vec<u8>> {
 // 1705
 pub fn solve_task1(file_content: &str) -> usize {
     let grid = parse_grid(file_content);
+
+    let rows = grid.len();
+    let cols = grid[0].len();
+
+    let mut top: Vec<Vec<u8>> = grid
+        .iter()
+        .map(|line| line.iter().map(|_| 0).collect())
+        .collect();
+
+    let mut right: Vec<Vec<u8>> = grid
+        .iter()
+        .map(|line| line.iter().map(|_| 0).collect())
+        .collect();
+    let mut bottom: Vec<Vec<u8>> = grid
+        .iter()
+        .map(|line| line.iter().map(|_| 0).collect())
+        .collect();
+    let mut left: Vec<Vec<u8>> = grid
+        .iter()
+        .map(|line| line.iter().map(|_| 0).collect())
+        .collect();
+
+    for i in (0..(rows - 1)).rev() {
+        for j in 0..cols {
+            top[i][j] = top[i + 1][j].max(grid[i + 1][j]);
+        }
+    }
+
+    for i in 1..rows {
+        for j in 0..cols {
+            bottom[i][j] = bottom[i - 1][j].max(grid[i - 1][j]);
+        }
+    }
+
+    for j in (0..(cols - 1)).rev() {
+        for i in 0..rows {
+            right[i][j] = right[i][j + 1].max(grid[i][j + 1]);
+        }
+    }
+    for j in 1..cols {
+        for i in 0..rows {
+            left[i][j] = left[i][j - 1].max(grid[i][j - 1]);
+        }
+    }
+
     let mut res = 0;
     for (row, line) in grid.iter().enumerate() {
         for col in 0..line.len() {
-            if is_visible(&grid, row, col) {
+            if row == 0 || col == 0 || row == rows - 1 || col == cols - 1 {
                 res += 1;
+                continue;
+            }
+            let v = grid[row][col];
+            if top[row][col] == 0
+                || right[row][col] == 0
+                || bottom[row][col] == 0
+                || left[row][col] == 0
+            {
+                if v > 0 {
+                    res += 1;
+                }
+                continue;
+            }
+
+            if top[row][col] < v {
+                res += 1;
+                continue;
+            }
+            if right[row][col] < v {
+                res += 1;
+                continue;
+            }
+            if bottom[row][col] < v {
+                res += 1;
+                continue;
+            }
+            if left[row][col] < v {
+                res += 1;
+                continue;
             }
         }
     }
     res
 }
 
-fn is_visible(grid: &Vec<Vec<u8>>, row: usize, col: usize) -> bool {
-    let v = grid[row][col];
-    let cols = grid[0].len();
-    (0..row).all(|i| grid[i][col] < v)
-        || ((row + 1)..grid.len()).all(|i| grid[i][col] < v)
-        || (0..col).all(|j| grid[row][j] < v)
-        || ((col + 1)..cols).all(|j| grid[row][j] < v)
-}
 struct TakeWhileInclusiveIter<T, P>
 where
     T: Iterator,
@@ -113,15 +179,26 @@ pub fn solve_task2(file_content: &str) -> usize {
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
+
     use super::*;
-    const INPUT: &str = "30373
+    const INPUT: &str = "
+30373
 25512
 65332
 33549
 35390";
+
+    #[test]
+    fn test_actual() {
+        let str = fs::read_to_string("./benches/y22d8.txt").unwrap_or_default();
+        let res = solve_task1(&str);
+        assert_eq!(res, 1705);
+    }
+
     #[test]
     fn test_task1() {
-        assert_eq!(format!("{}", solve_task1(INPUT)), "21");
+        assert_eq!(format!("{}", solve_task1(INPUT.trim())), "21");
     }
 
     #[test]
