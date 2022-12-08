@@ -5,6 +5,7 @@ fn parse_grid(file_content: &str) -> Vec<Vec<u8>> {
         .collect()
 }
 
+// 1705
 pub fn solve_task1(file_content: &str) -> usize {
     let grid = parse_grid(file_content);
     let mut res = 0;
@@ -97,6 +98,7 @@ fn get_score(grid: &Vec<Vec<u8>>, row: usize, col: usize) -> usize {
         .count();
     top * right * bottom * left
 }
+// 371200
 pub fn solve_task2(file_content: &str) -> impl std::fmt::Display {
     let grid = parse_grid(file_content);
     let mut res = 0;
