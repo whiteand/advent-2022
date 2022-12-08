@@ -6,9 +6,7 @@ fn parse_grid(file_content: &str) -> Vec<Vec<u8>> {
 }
 
 fn nullify(arr: &[Vec<u8>]) -> Vec<Vec<u8>> {
-    arr.iter()
-        .map(|line| line.iter().map(|_| 0).collect())
-        .collect()
+    arr.iter().map(|line| vec![0; line.len()]).collect()
 }
 
 // 1705
