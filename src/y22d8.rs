@@ -5,6 +5,12 @@ fn parse_grid(file_content: &str) -> Vec<Vec<u8>> {
         .collect()
 }
 
+fn nullify(arr: &[Vec<u8>]) -> Vec<Vec<u8>> {
+    arr.iter()
+        .map(|line| line.iter().map(|_| 0).collect())
+        .collect()
+}
+
 // 1705
 pub fn solve_task1(file_content: &str) -> usize {
     let grid = parse_grid(file_content);
@@ -12,23 +18,10 @@ pub fn solve_task1(file_content: &str) -> usize {
     let rows = grid.len();
     let cols = grid[0].len();
 
-    let mut top: Vec<Vec<u8>> = grid
-        .iter()
-        .map(|line| line.iter().map(|_| 0).collect())
-        .collect();
-
-    let mut right: Vec<Vec<u8>> = grid
-        .iter()
-        .map(|line| line.iter().map(|_| 0).collect())
-        .collect();
-    let mut bottom: Vec<Vec<u8>> = grid
-        .iter()
-        .map(|line| line.iter().map(|_| 0).collect())
-        .collect();
-    let mut left: Vec<Vec<u8>> = grid
-        .iter()
-        .map(|line| line.iter().map(|_| 0).collect())
-        .collect();
+    let mut top: Vec<Vec<u8>> = nullify(&grid);
+    let mut right: Vec<Vec<u8>> = nullify(&grid);
+    let mut bottom: Vec<Vec<u8>> = nullify(&grid);
+    let mut left: Vec<Vec<u8>> = nullify(&grid);
 
     for i in (0..(rows - 1)).rev() {
         for j in 0..cols {
@@ -182,8 +175,7 @@ mod tests {
     use std::fs;
 
     use super::*;
-    const INPUT: &str = "
-30373
+    const INPUT: &str = "30373
 25512
 65332
 33549
