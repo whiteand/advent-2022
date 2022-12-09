@@ -1,6 +1,6 @@
 use nom::{self, IResult};
 
-use super::moves::Move;
+use super::moves::{Direction, Move};
 
 fn try_parse_move(line: &str) -> IResult<&str, Move> {
     nom::combinator::map(
@@ -9,11 +9,23 @@ fn try_parse_move(line: &str) -> IResult<&str, Move> {
             nom::character::complete::space1,
             nom::character::complete::u32,
         ),
-        |(a, d): (&str, u32)| match a {
-            "L" => Move::Left(d),
-            "U" => Move::Up(d),
-            "R" => Move::Right(d),
-            "D" => Move::Down(d),
+        |(a, distance): (&str, u32)| match a {
+            "L" => Move {
+                direction: Direction::Left,
+                distance,
+            },
+            "U" => Move {
+                direction: Direction::Up,
+                distance,
+            },
+            "R" => Move {
+                direction: Direction::Right,
+                distance,
+            },
+            "D" => Move {
+                direction: Direction::Down,
+                distance,
+            },
             _ => unreachable!(),
         },
     )(line)

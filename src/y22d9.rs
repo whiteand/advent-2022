@@ -1,24 +1,49 @@
 use std::collections::BTreeSet;
 
-use state::State;
-
 mod moves;
 mod parse;
-mod state;
 
-fn solve(file_content: &str, size: usize) -> usize {
-    State::new(size)
-        .get_path(parse::parse_moves(file_content))
-        .map(|s| s.tail())
-        .collect::<BTreeSet<_>>()
-        .len()
+fn follow(tail_x: &mut i32, tail_y: &mut i32, head_x: &i32, head_y: &i32) {
+    if (*head_x - *tail_x).abs() <= 1 && (*head_y - *tail_y).abs() <= 1 {
+        return;
+    }
+    let dx = (*head_x - *tail_x).signum();
+    let dy = (*head_y - *tail_y).signum();
+    *tail_x += dx;
+    *tail_y += dy;
+}
+
+fn solve<const N: usize>(file_content: &str) -> usize {
+    let mut rope_x = [0; N];
+    let mut rope_y = [0; N];
+    let mut s = BTreeSet::new();
+
+    for mut m in parse::parse_moves(file_content) {
+        while !m.is_empty() {
+            m.apply(&mut rope_x[0], &mut rope_y[0]);
+            for i in 1..N {
+                if (rope_x[i - 1] - rope_x[i]).abs() <= 1 && (rope_y[i - 1] - rope_y[i]).abs() <= 1
+                {
+                    continue;
+                }
+                let dx = (rope_x[i - 1] - rope_x[i]).signum();
+                let dy = (rope_y[i - 1] - rope_y[i]).signum();
+                rope_x[i] += dx;
+                rope_y[i] += dy;
+            }
+            let tail_pos_x = *rope_x.last().unwrap();
+            let tail_pos_y = *rope_y.last().unwrap();
+            s.insert((tail_pos_x, tail_pos_y));
+        }
+    }
+    s.len()
 }
 
 pub fn solve_task1(file_content: &str) -> usize {
-    solve(file_content, 2)
+    solve::<2>(file_content)
 }
 pub fn solve_task2(file_content: &str) -> usize {
-    solve(file_content, 10)
+    solve::<10>(file_content)
 }
 #[cfg(test)]
 mod tests {

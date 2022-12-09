@@ -227,7 +227,6 @@ mod tests {
     #[test]
     fn test_get_gench_code() {
         let res = get_bench_code(2022, 26, 2);
-        println!("Output:\n---\n{res}\n---\n");
-        assert_eq!("abc", res.as_str())
+        assert_eq!("use std::fs;\nuse advent::y22d26::{solve_task1, solve_task2};\nuse criterion::{black_box, criterion_group, criterion_main, Criterion};\n\npub fn criterion_benchmark(c: &mut Criterion) {\n    let content = fs::read_to_string(\"./benches/y22d26.txt\").unwrap();\n    c.bench_function(\"solve 1\", |b| b.iter(|| solve_task1(black_box(&content))));\n    c.bench_function(\"solve 2\", |b| b.iter(|| solve_task2(black_box(&content))));\n}\n\ncriterion_group!(benches, criterion_benchmark);\ncriterion_main!(benches);\n", res.as_str())
     }
 }
