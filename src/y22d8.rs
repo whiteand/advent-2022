@@ -179,6 +179,7 @@ mod tests {
 33549
 35390";
 
+    #[ignore]
     #[test]
     fn test_actual() {
         let str = fs::read_to_string("./benches/y22d8.txt").unwrap_or_default();
@@ -186,23 +187,27 @@ mod tests {
         assert_eq!(res, 1705);
     }
 
+    #[ignore]
     #[test]
     fn test_task1() {
         assert_eq!(format!("{}", solve_task1(INPUT.trim())), "21");
     }
 
+    #[ignore]
     #[test]
     fn test_score_1() {
         let grid = parse_grid(INPUT);
         let score = get_score(&grid, 1, 2);
         assert_eq!(score, 4)
     }
+    #[ignore]
     #[test]
     fn test_score_2() {
         let grid = parse_grid(INPUT);
         let score = get_score(&grid, 3, 2);
         assert_eq!(score, 8)
     }
+    #[ignore]
     #[test]
     fn test_task2() {
         assert_eq!(format!("{}", solve_task2(INPUT)), "8");
