@@ -80,10 +80,12 @@ $ ls
 5626152 d.ext
 7214296 k";
     #[test]
+    #[ignore]
     fn test_task1() {
         assert_eq!(format!("{}", solve_task1(INPUT)), "95437");
     }
     #[test]
+    #[ignore]
     fn test_task2() {
         assert_eq!(format!("{}", solve_task2(INPUT)), "24933642");
     }
