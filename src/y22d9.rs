@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::collections::HashSet;
 
 mod moves;
 mod parse;
@@ -6,7 +6,7 @@ mod parse;
 fn solve<const N: usize>(file_content: &str) -> usize {
     let mut rope_x = [0; N];
     let mut rope_y = [0; N];
-    let mut s = BTreeSet::new();
+    let mut s = HashSet::new();
 
     for mut m in parse::parse_moves(file_content) {
         for _ in 0..m.distance {
