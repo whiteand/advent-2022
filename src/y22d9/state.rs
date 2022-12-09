@@ -108,7 +108,7 @@ impl State {
                             ..self.head
                         },
                         tail: Position {
-                            y: self.head.y + 1,
+                            y: self.tail.y + 1,
                             x: self.head.x,
                         },
                     }
@@ -555,6 +555,6 @@ mod tests {
     }
     #[test]
     fn test_down_9() {
-        assert_move([1, 0, 0, 0], Move::Down(1), [1, 2, 1, 1]);
+        assert_move([1, 1, 0, 0], Move::Down(1), [1, 2, 1, 1]);
     }
 }

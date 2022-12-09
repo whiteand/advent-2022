@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 use state::State;
 
@@ -9,9 +9,8 @@ mod state;
 pub fn solve_task1(file_content: &str) -> usize {
     State::default()
         .get_path(parse::parse_moves(file_content))
-        .inspect(|s| println!("{}\n", s))
         .map(|s| s.tail)
-        .collect::<HashSet<_>>()
+        .collect::<BTreeSet<_>>()
         .len()
 }
 pub fn solve_task2(file_content: &str) -> impl std::fmt::Display {
@@ -37,7 +36,7 @@ R 2";
     fn test_y22_d9_t1_actual() {
         let str = fs::read_to_string("./benches/y22d9.txt").unwrap_or_default();
         let res = solve_task1(&str);
-        assert_eq!(res, 0);
+        assert_eq!(res, 6067);
     }
     #[test]
     fn test_task2() {
