@@ -23,6 +23,7 @@ impl std::fmt::Debug for Move {
 }
 
 impl Move {
+    #[inline]
     pub fn apply(&mut self, x: &mut i32, y: &mut i32) {
         if self.distance == 0 {
             return;

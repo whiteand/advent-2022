@@ -12,14 +12,13 @@ fn solve<const N: usize>(file_content: &str) -> usize {
         for _ in 0..m.distance {
             m.apply(&mut rope_x[0], &mut rope_y[0]);
             for i in 1..N {
-                if (rope_x[i - 1] - rope_x[i]).abs() <= 1 && (rope_y[i - 1] - rope_y[i]).abs() <= 1
-                {
+                let dx = rope_x[i - 1] - rope_x[i];
+                let dy = rope_y[i - 1] - rope_y[i];
+                if dy.abs() <= 1 && dx.abs() <= 1 {
                     continue;
                 }
-                let dx = (rope_x[i - 1] - rope_x[i]).signum();
-                let dy = (rope_y[i - 1] - rope_y[i]).signum();
-                rope_x[i] += dx;
-                rope_y[i] += dy;
+                rope_x[i] += dx.signum();
+                rope_y[i] += dy.signum();
             }
             let tail_pos_x = rope_x[N - 1];
             let tail_pos_y = rope_y[N - 1];
