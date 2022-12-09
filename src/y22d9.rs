@@ -3,23 +3,13 @@ use std::collections::BTreeSet;
 mod moves;
 mod parse;
 
-fn follow(tail_x: &mut i32, tail_y: &mut i32, head_x: &i32, head_y: &i32) {
-    if (*head_x - *tail_x).abs() <= 1 && (*head_y - *tail_y).abs() <= 1 {
-        return;
-    }
-    let dx = (*head_x - *tail_x).signum();
-    let dy = (*head_y - *tail_y).signum();
-    *tail_x += dx;
-    *tail_y += dy;
-}
-
 fn solve<const N: usize>(file_content: &str) -> usize {
     let mut rope_x = [0; N];
     let mut rope_y = [0; N];
     let mut s = BTreeSet::new();
 
     for mut m in parse::parse_moves(file_content) {
-        while !m.is_empty() {
+        for _ in 0..m.distance {
             m.apply(&mut rope_x[0], &mut rope_y[0]);
             for i in 1..N {
                 if (rope_x[i - 1] - rope_x[i]).abs() <= 1 && (rope_y[i - 1] - rope_y[i]).abs() <= 1
@@ -31,8 +21,8 @@ fn solve<const N: usize>(file_content: &str) -> usize {
                 rope_x[i] += dx;
                 rope_y[i] += dy;
             }
-            let tail_pos_x = *rope_x.last().unwrap();
-            let tail_pos_y = *rope_y.last().unwrap();
+            let tail_pos_x = rope_x[N - 1];
+            let tail_pos_y = rope_y[N - 1];
             s.insert((tail_pos_x, tail_pos_y));
         }
     }

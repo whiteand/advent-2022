@@ -1,11 +1,17 @@
 use advent::y22d9::{solve_task1, solve_task2};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use std::fs;
+use std::{fs, time::Duration};
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     let content = fs::read_to_string("./benches/y22d9.txt").unwrap();
-    c.bench_function("solve 1", |b| b.iter(|| solve_task1(black_box(&content))));
-    c.bench_function("solve 2", |b| b.iter(|| solve_task2(black_box(&content))));
+    let mut group = c.benchmark_group("day 9");
+
+    group.measurement_time(Duration::from_secs(6));
+
+    group.bench_function("solve 1", |b| b.iter(|| solve_task1(black_box(&content))));
+    group.bench_function("solve 2", |b| b.iter(|| solve_task2(black_box(&content))));
+
+    group.finish();
 }
 
 criterion_group!(benches, criterion_benchmark);

@@ -46,8 +46,4 @@ impl Move {
             }
         }
     }
-    #[inline]
-    pub fn is_empty(&self) -> bool {
-        self.distance == 0
-    }
 }
