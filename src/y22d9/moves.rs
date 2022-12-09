@@ -25,26 +25,20 @@ impl std::fmt::Debug for Move {
 impl Move {
     #[inline]
     pub fn apply(&mut self, x: &mut i32, y: &mut i32) {
-        if self.distance == 0 {
-            return;
-        }
         match self.direction {
             Direction::Up => {
                 *y -= 1;
-                self.distance -= 1;
             }
             Direction::Right => {
                 *x += 1;
-                self.distance -= 1;
             }
             Direction::Down => {
                 *y += 1;
-                self.distance -= 1;
             }
             Direction::Left => {
                 *x -= 1;
-                self.distance -= 1;
             }
         }
+        self.distance -= 1;
     }
 }
