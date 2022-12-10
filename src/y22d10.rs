@@ -42,7 +42,7 @@ impl<Cmds> Iterator for CPU<Cmds>
 where
     Cmds: Iterator<Item = Command>,
 {
-    type Item = (usize, CpuRegisters, CpuRegisters);
+    type Item = CpuRegisters;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.current {
@@ -51,7 +51,7 @@ where
                     self.cycle += 1;
                     let before = self.registers.clone();
                     self.current = None;
-                    Some((self.cycle, before, self.registers.clone()))
+                    Some(before)
                 }
                 Command::Addx(delta) => {
                     self.cycle += 1;
@@ -62,7 +62,7 @@ where
                     }
                     let after = self.registers.clone();
 
-                    Some((self.cycle, before, after))
+                    Some(before)
                 }
             },
             None => match self.commands.next() {
@@ -98,8 +98,9 @@ fn parse_commands(input: &str) -> impl Iterator<Item = Command> + '_ {
 
 pub fn solve_task1(file_content: &str) -> i32 {
     CPU::new(parse_commands(file_content))
-        .filter(|(cycle, _, _)| cycle % 40 == 20)
-        .map(|(cycle, [register], _)| (cycle as i32) * register)
+        .enumerate()
+        .filter(|(cycle, _)| (*cycle + 1) % 40 == 20)
+        .map(|(cycle, [register])| ((cycle + 1) as i32) * register)
         .sum()
 }
 
@@ -135,7 +136,7 @@ impl CRT {
 pub fn solve_task2(file_content: &str) {
     let mut cpu = CPU::new(parse_commands(file_content));
     let mut crt = CRT::new();
-    for (_, registers, _) in cpu {
+    for registers in cpu {
         print!("{}", crt.draw(&registers))
     }
 }
