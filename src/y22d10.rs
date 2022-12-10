@@ -24,8 +24,10 @@ pub fn solve_task2(file_content: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
+
     const INPUT: &str = "addx 15
-addx -11
+    addx -11
 addx 6
 addx -3
 addx 5
@@ -171,11 +173,12 @@ noop
 noop
 noop";
     #[test]
+    #[ignore]
     fn test_task1() {
         assert_eq!(format!("{}", solve_task1(INPUT)), "13140");
     }
-    use std::fs;
     #[test]
+    #[ignore]
     fn test_task1_actual() {
         let str = fs::read_to_string("./benches/y22d10.txt").unwrap_or_default();
 
@@ -183,6 +186,7 @@ noop";
     }
 
     #[test]
+    #[ignore]
     fn test_task1_small() {
         assert_eq!(
             format!(
@@ -198,6 +202,7 @@ addx -5"
     }
 
     #[test]
+    #[ignore]
     fn test_task2() {
         let res = solve_task2(INPUT);
         assert_eq!(
