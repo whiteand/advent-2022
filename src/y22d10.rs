@@ -16,13 +16,10 @@ pub fn solve_task1(file_content: &str) -> i32 {
         .sum()
 }
 
-pub fn get_output_for_task2(file_content: &str) -> String {
+pub fn solve_task2(file_content: &str) -> String {
     CPU::new(parse_commands(file_content))
         .scan(CRT::new(), |c, r| Some(c.draw(r)))
         .collect::<String>()
-}
-pub fn solve_task2(file_content: &str) {
-    print!("{}", get_output_for_task2(file_content));
 }
 #[cfg(test)]
 mod tests {
@@ -201,8 +198,8 @@ addx -5"
     }
 
     #[test]
-    fn test_output_task2() {
-        let res = get_output_for_task2(INPUT);
+    fn test_task2() {
+        let res = solve_task2(INPUT);
         assert_eq!(
             res,
             "##..##..##..##..##..##..##..##..##..##..
