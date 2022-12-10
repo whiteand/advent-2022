@@ -6,8 +6,6 @@ enum Command {
     Addx(i32),
 }
 
-type CpuRegisters = [i32; 1];
-const X: usize = 0;
 #[derive(Clone, Copy, Debug)]
 struct Current {
     command: Command,
@@ -21,7 +19,7 @@ where
     commands: Cmds,
     cycle: usize,
     current: Option<Current>,
-    registers: CpuRegisters,
+    x: i32,
 }
 
 impl<Cmd> CPU<Cmd>
@@ -33,7 +31,7 @@ where
             commands: cmds,
             cycle: 0,
             current: None,
-            registers: [1],
+            x: 1,
         }
     }
 }
@@ -42,22 +40,21 @@ impl<Cmds> Iterator for CPU<Cmds>
 where
     Cmds: Iterator<Item = Command>,
 {
-    type Item = CpuRegisters;
+    type Item = i32;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.current {
             Some(Current { command, start }) => match command {
                 Command::Noop => {
                     self.cycle += 1;
-                    let before = self.registers.clone();
                     self.current = None;
-                    Some(before)
+                    Some(self.x)
                 }
                 Command::Addx(delta) => {
                     self.cycle += 1;
-                    let before = self.registers.clone();
+                    let before = self.x;
                     if start + 2 == self.cycle {
-                        self.registers[X] += delta;
+                        self.x += delta;
                         self.current = None;
                     }
 
@@ -99,7 +96,7 @@ pub fn solve_task1(file_content: &str) -> i32 {
     CPU::new(parse_commands(file_content))
         .enumerate()
         .filter(|(cycle, _)| (*cycle + 1) % 40 == 20)
-        .map(|(cycle, [register])| ((cycle + 1) as i32) * register)
+        .map(|(cycle, register)| ((cycle + 1) as i32) * register)
         .sum()
 }
 
@@ -112,9 +109,8 @@ impl CRT {
     pub fn new() -> Self {
         Self { row: 0, col: 0 }
     }
-    pub fn draw(&mut self, registers: &CpuRegisters) -> &str {
-        let position = registers[X];
-        let is_filled = (position - self.col as i32).abs() <= 1;
+    pub fn draw(&mut self, register_x: i32) -> &str {
+        let is_filled = (register_x - self.col as i32).abs() <= 1;
         let is_new_line = self.col == 39;
 
         self.col += 1;
@@ -133,10 +129,10 @@ impl CRT {
 }
 
 pub fn solve_task2(file_content: &str) {
-    let mut cpu = CPU::new(parse_commands(file_content));
+    let cpu = CPU::new(parse_commands(file_content));
     let mut crt = CRT::new();
-    for registers in cpu {
-        print!("{}", crt.draw(&registers))
+    for x in cpu {
+        print!("{}", crt.draw(x))
     }
 }
 #[cfg(test)]
