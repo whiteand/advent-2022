@@ -60,7 +60,6 @@ where
                         self.registers[X] += delta;
                         self.current = None;
                     }
-                    let after = self.registers.clone();
 
                     Some(before)
                 }
