@@ -10,18 +10,19 @@ use parse::parse_commands;
 pub fn solve_task1(file_content: &str) -> i32 {
     CPU::new(parse_commands(file_content))
         .enumerate()
-        .filter(|(cycle, _)| (*cycle + 1) % 40 == 20)
-        .map(|(cycle, register)| ((cycle + 1) as i32) * register)
+        .map(|(ind, register)| ((ind + 1) as i32, register))
+        .filter(|(cycle, _)| *cycle % 40 == 20)
+        .map(|(cycle, register)| cycle * register)
         .sum()
 }
 
+pub fn get_output_for_task2(file_content: &str) -> String {
+    CPU::new(parse_commands(file_content))
+        .scan(CRT::new(), |c, r| Some(c.draw(r)))
+        .collect::<String>()
+}
 pub fn solve_task2(file_content: &str) {
-    print!(
-        "{}",
-        CPU::new(parse_commands(file_content))
-            .scan(CRT::new(), |c, r| Some(c.draw(r)))
-            .collect::<String>()
-    );
+    print!("{}", get_output_for_task2(file_content));
 }
 #[cfg(test)]
 mod tests {
@@ -196,6 +197,21 @@ addx -5"
                 )
             ),
             "0"
+        );
+    }
+
+    #[test]
+    fn test_output_task2() {
+        let res = get_output_for_task2(INPUT);
+        assert_eq!(
+            res,
+            "##..##..##..##..##..##..##..##..##..##..
+###...###...###...###...###...###...###.
+####....####....####....####....####....
+#####.....#####.....#####.....#####.....
+######......######......######......####
+#######.......#######.......#######.....
+"
         );
     }
 }
