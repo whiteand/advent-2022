@@ -109,7 +109,7 @@ impl CRT {
     pub fn new() -> Self {
         Self { row: 0, col: 0 }
     }
-    pub fn draw(&mut self, register_x: i32) -> &str {
+    pub fn draw(&mut self, register_x: i32) -> &'static str {
         let is_filled = (register_x - self.col as i32).abs() <= 1;
         let is_new_line = self.col == 39;
 
@@ -129,11 +129,12 @@ impl CRT {
 }
 
 pub fn solve_task2(file_content: &str) {
-    let cpu = CPU::new(parse_commands(file_content));
-    let mut crt = CRT::new();
-    for x in cpu {
-        print!("{}", crt.draw(x))
-    }
+    print!(
+        "{}",
+        CPU::new(parse_commands(file_content))
+            .scan(CRT::new(), |c, r| Some(c.draw(r)))
+            .collect::<String>()
+    );
 }
 #[cfg(test)]
 mod tests {
