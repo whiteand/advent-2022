@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use std::collections::VecDeque;
 
 pub fn solve_task1(file_content: &str) -> usize {
@@ -5,14 +6,56 @@ pub fn solve_task1(file_content: &str) -> usize {
     solve(&grid, start, end)
 }
 
-pub fn solve_task2(file_content: &str) -> impl std::fmt::Display {
-    let (grid, _, end) = parse_grid(file_content);
-    (0..grid.len())
-        .flat_map(|row| (0..grid[row].len()).map(move |col| (row, col)))
-        .filter(|(r, c)| grid[*r][*c] == START_VALUE)
-        .map(|p| solve(&grid, p, end))
+pub fn solve_task2(file_content: &str) -> usize {
+    let (grid, _, start) = parse_grid(file_content);
+    let rows = grid.len();
+    let cols = grid[0].len();
+
+    let mut visited = grid
+        .iter()
+        .map(|v| vec![false; v.len()])
+        .collect::<Vec<_>>();
+    let mut minimal_distance = grid
+        .iter()
+        .map(|v| vec![usize::MAX; v.len()])
+        .collect::<Vec<_>>();
+    let mut tasks: VecDeque<(usize, usize)> = VecDeque::new();
+
+    // invariants:
+    //   visited[i] is true if the node was already visited and minimal distance was calculated to all neighbours
+    //   minimal_distance[i] - contains minimal distance to the node if the node was already visited
+    //   tasks - contains a list of visited nodes which neighbors were potentially not visited.
+
+    minimal_distance[start.0][start.1] = 0;
+
+    tasks.push_back(start);
+
+    while tasks.len() > 0 {
+        let Some((row, col)) = tasks.pop_front() else {
+            unreachable!();
+        };
+        if visited[row][col] {
+            continue;
+        }
+        let current_height = grid[row][col];
+        for (r, c) in get_neighbours(rows, cols, row, col)
+            .into_iter()
+            .filter(|(r, c)| !visited[*r][*c])
+            .filter(|(r, c)| (current_height.saturating_sub(1)..=END_VALUE).contains(&grid[*r][*c]))
+        {
+            let min_distance =
+                minimal_distance[r][c].min(minimal_distance[row][col].saturating_add(1));
+            minimal_distance[r][c] = min_distance;
+            tasks.push_back((r, c));
+        }
+        visited[row][col] = true;
+    }
+    (0..rows)
+        .cartesian_product(0..cols)
+        .filter(|(a, b)| grid[*a][*b] == START_VALUE)
+        .map(|(a, b)| minimal_distance[a][b])
         .min()
-        .unwrap_or_default()
+        .unwrap_or(usize::MAX)
 }
 
 const ALPHABET: &str = "abcdefghijklmnopqrstuvwxyz";
