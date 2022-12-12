@@ -1,3 +1,20 @@
+use std::collections::VecDeque;
+
+pub fn solve_task1(file_content: &str) -> usize {
+    let (grid, start, end) = parse_grid(file_content);
+    solve(&grid, start, end)
+}
+
+pub fn solve_task2(file_content: &str) -> impl std::fmt::Display {
+    let (grid, _, end) = parse_grid(file_content);
+    (0..grid.len())
+        .flat_map(|row| (0..grid[row].len()).map(move |col| (row, col)))
+        .filter(|(r, c)| grid[*r][*c] == START_VALUE)
+        .map(|p| solve(&grid, p, end))
+        .min()
+        .unwrap_or_default()
+}
+
 const ALPHABET: &str = "abcdefghijklmnopqrstuvwxyz";
 const END_VALUE: usize = ALPHABET.len() - 1;
 const START_VALUE: usize = 0;
@@ -14,7 +31,7 @@ pub fn solve(grid: &[Vec<usize>], start: (usize, usize), end: (usize, usize)) ->
         .iter()
         .map(|v| vec![usize::MAX; v.len()])
         .collect::<Vec<_>>();
-    let mut tasks: Vec<(usize, usize)> = Vec::new();
+    let mut tasks: VecDeque<(usize, usize)> = VecDeque::new();
 
     // invariants:
     //   visited[i] is true if the node was already visited and minimal distance was calculated to all neighbours
@@ -23,15 +40,10 @@ pub fn solve(grid: &[Vec<usize>], start: (usize, usize), end: (usize, usize)) ->
 
     minimal_distance[start.0][start.1] = 0;
 
-    tasks.push(start);
+    tasks.push_back(start);
 
     while tasks.len() > 0 {
-        tasks.sort_by(|(r1, c1), (r2, c2)| {
-            let min_d1 = minimal_distance[*r1][*c1];
-            let min_d2 = minimal_distance[*r2][*c2];
-            min_d2.cmp(&min_d1)
-        });
-        let Some((row, col)) = tasks.pop() else {
+        let Some((row, col)) = tasks.pop_front() else {
             unreachable!();
         };
         if visited[row][col] {
@@ -41,61 +53,16 @@ pub fn solve(grid: &[Vec<usize>], start: (usize, usize), end: (usize, usize)) ->
         for (r, c) in get_neighbours(rows, cols, row, col)
             .into_iter()
             .filter(|(r, c)| !visited[*r][*c])
+            .filter(|(r, c)| (0..=current_height + 1).contains(&grid[*r][*c]))
         {
-            let neighbour_height = grid[r][c];
-            if !(0..=current_height + 1).contains(&neighbour_height) {
-                continue;
-            }
             let min_distance =
                 minimal_distance[r][c].min(minimal_distance[row][col].saturating_add(1));
             minimal_distance[r][c] = min_distance;
-            tasks.push((r, c));
+            tasks.push_back((r, c));
         }
         visited[row][col] = true;
     }
-    // print_dists(&minimal_distance);
     minimal_distance[end.0][end.1]
-}
-pub fn solve_task1(file_content: &str) -> usize {
-    let (grid, start, end) = parse_grid(file_content);
-    solve(&grid, start, end)
-}
-
-fn print_dists(minimal_distance: &[Vec<usize>]) {
-    for l in minimal_distance.iter() {
-        for x in l.iter() {
-            let c = if *x == usize::MAX {
-                "  ∞".to_owned()
-            } else {
-                format!("{:3}", x)
-            };
-            print!("{c}");
-        }
-        println!();
-    }
-}
-
-pub fn solve_task2(file_content: &str) -> impl std::fmt::Display {
-    let (grid, _, end) = parse_grid(file_content);
-    let mut min_step = usize::MAX;
-    for i in 0..grid.len() {
-        for j in 0..grid[i].len() {
-            let v = grid[i][j];
-            if v == START_VALUE {
-                let min_steps = solve(&grid, (i, j), end);
-                min_step = min_step.min(min_steps);
-            }
-        }
-    }
-    min_step
-}
-
-fn dist(a: usize, b: usize) -> usize {
-    if a > b {
-        a - b
-    } else {
-        b - a
-    }
 }
 
 fn parse_grid(file_content: &str) -> (Vec<Vec<usize>>, (usize, usize), (usize, usize)) {
@@ -123,20 +90,6 @@ fn parse_grid(file_content: &str) -> (Vec<Vec<usize>>, (usize, usize), (usize, u
         res.push(new_line);
     }
     (res, start.unwrap(), end.unwrap())
-}
-
-fn find_in_grid<T: Eq + PartialEq + Copy>(grid: &[Vec<T>], value: T) -> Option<(usize, usize)> {
-    grid.iter().enumerate().find_map(|(row, line)| {
-        line.iter().enumerate().find_map(
-            move |(col, x)| {
-                if *x == value {
-                    Some((row, col))
-                } else {
-                    None
-                }
-            },
-        )
-    })
 }
 
 pub fn get_neighbours(rows: usize, cols: usize, row: usize, col: usize) -> Vec<(usize, usize)> {
@@ -169,23 +122,19 @@ acctuvwj
 abdefghi";
     const ACTUAL: &str = include_str!("../benches/y22d12.txt");
     #[test]
-    #[ignore]
     fn test_task1() {
         assert_eq!(format!("{}", solve_task1(INPUT)), "31");
     }
     #[test]
-    #[ignore]
     fn test_task1_actual() {
         assert_eq!(format!("{}", solve_task1(ACTUAL)), "484");
     }
     #[test]
-    #[ignore]
     fn test_task2() {
         assert_eq!(format!("{}", solve_task2(INPUT)), "29");
     }
     #[test]
-    #[ignore]
     fn test_task2_actual() {
-        assert_eq!(format!("{}", solve_task2(ACTUAL)), "0");
+        assert_eq!(format!("{}", solve_task2(ACTUAL)), "478");
     }
 }
