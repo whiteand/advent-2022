@@ -31,7 +31,7 @@ pub fn solve(grid: &[Vec<usize>], start: (usize, usize), end: (usize, usize)) ->
         .iter()
         .map(|v| vec![usize::MAX; v.len()])
         .collect::<Vec<_>>();
-    let mut tasks: VecDeque<(usize, usize)> = VecDeque::new();
+    let mut tasks: Vec<(usize, usize)> = Vec::new();
 
     // invariants:
     //   visited[i] is true if the node was already visited and minimal distance was calculated to all neighbours
@@ -40,10 +40,27 @@ pub fn solve(grid: &[Vec<usize>], start: (usize, usize), end: (usize, usize)) ->
 
     minimal_distance[start.0][start.1] = 0;
 
-    tasks.push_back(start);
+    tasks.push(start);
 
     while tasks.len() > 0 {
-        let Some((row, col)) = tasks.pop_front() else {
+        tasks.sort_by(|a, b| {
+            let g1 = minimal_distance[a.0][a.1];
+            let g2 = minimal_distance[b.0][b.1];
+            let h1 = if a.0 > end.0 {
+                a.0 - end.0
+            } else {
+                end.0 - a.0
+            };
+            let h2 = if b.0 > end.0 {
+                b.0 - end.0
+            } else {
+                end.0 - b.0
+            };
+            let s1 = g1 + h1;
+            let s2 = g2 + h2;
+            s2.cmp(&s1)
+        });
+        let Some((row, col)) = tasks.pop() else {
             unreachable!();
         };
         if visited[row][col] {
@@ -58,11 +75,14 @@ pub fn solve(grid: &[Vec<usize>], start: (usize, usize), end: (usize, usize)) ->
             let min_distance =
                 minimal_distance[r][c].min(minimal_distance[row][col].saturating_add(1));
             minimal_distance[r][c] = min_distance;
-            tasks.push_back((r, c));
+            if r == end.0 && c == end.1 {
+                return min_distance;
+            }
+            tasks.push((r, c));
         }
         visited[row][col] = true;
     }
-    minimal_distance[end.0][end.1]
+    usize::MAX
 }
 
 fn parse_grid(file_content: &str) -> (Vec<Vec<usize>>, (usize, usize), (usize, usize)) {
