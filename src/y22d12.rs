@@ -31,7 +31,7 @@ pub fn solve(grid: &[Vec<usize>], start: (usize, usize), end: (usize, usize)) ->
         .iter()
         .map(|v| vec![usize::MAX; v.len()])
         .collect::<Vec<_>>();
-    let mut tasks: Vec<(usize, usize)> = Vec::new();
+    let mut tasks: VecDeque<(usize, usize)> = VecDeque::new();
 
     // invariants:
     //   visited[i] is true if the node was already visited and minimal distance was calculated to all neighbours
@@ -40,15 +40,10 @@ pub fn solve(grid: &[Vec<usize>], start: (usize, usize), end: (usize, usize)) ->
 
     minimal_distance[start.0][start.1] = 0;
 
-    tasks.push(start);
+    tasks.push_back(start);
 
     while tasks.len() > 0 {
-        tasks.sort_by(|a, b| {
-            let g1 = minimal_distance[a.0][a.1];
-            let g2 = minimal_distance[b.0][b.1];
-            g2.cmp(&g1)
-        });
-        let Some((row, col)) = tasks.pop() else {
+        let Some((row, col)) = tasks.pop_front() else {
             unreachable!();
         };
         if visited[row][col] {
@@ -66,7 +61,7 @@ pub fn solve(grid: &[Vec<usize>], start: (usize, usize), end: (usize, usize)) ->
             if r == end.0 && c == end.1 {
                 return min_distance;
             }
-            tasks.push((r, c));
+            tasks.push_back((r, c));
         }
         visited[row][col] = true;
     }
