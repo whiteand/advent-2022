@@ -46,19 +46,7 @@ pub fn solve(grid: &[Vec<usize>], start: (usize, usize), end: (usize, usize)) ->
         tasks.sort_by(|a, b| {
             let g1 = minimal_distance[a.0][a.1];
             let g2 = minimal_distance[b.0][b.1];
-            let h1 = if a.0 > end.0 {
-                a.0 - end.0
-            } else {
-                end.0 - a.0
-            };
-            let h2 = if b.0 > end.0 {
-                b.0 - end.0
-            } else {
-                end.0 - b.0
-            };
-            let s1 = g1 + h1;
-            let s2 = g2 + h2;
-            s2.cmp(&s1)
+            g2.cmp(&g1)
         });
         let Some((row, col)) = tasks.pop() else {
             unreachable!();
