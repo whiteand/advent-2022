@@ -124,18 +124,22 @@ mod tests {
     const ACTUAL: &str = include_str!("../benches/y22d13.txt");
 
     #[test]
+    #[ignore]
     fn test_task1() {
         assert_eq!(format!("{}", solve_task1(INPUT)), "13");
     }
     #[test]
+    #[ignore]
     fn test_task1_actual() {
         assert_eq!(format!("{}", solve_task1(ACTUAL)), "5003");
     }
     #[test]
+    #[ignore]
     fn test_task2() {
         assert_eq!(format!("{}", solve_task2(INPUT)), "140");
     }
     #[test]
+    #[ignore]
     fn test_task2_actual() {
         assert_eq!(format!("{}", solve_task2(ACTUAL)), "20280");
     }
