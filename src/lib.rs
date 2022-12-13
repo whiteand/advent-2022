@@ -7,6 +7,7 @@ pub mod y20d2;
 pub mod y22d10;
 pub mod y22d11;
 pub mod y22d12;
+pub mod y22d13;
 pub mod y22d4;
 pub mod y22d5;
 pub mod y22d6;
