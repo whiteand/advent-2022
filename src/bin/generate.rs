@@ -55,7 +55,7 @@ fn generate(year: u32, day: u32, tasks: u32) {
     generate_bench(year, day, tasks);
 
     let global_library_path = Path::new("src/lib.rs");
-    let day_lib_path = format!("src/y{}d{}.rs", year % 2000, day);
+    let day_lib_path = format!("src/y{}d{:02}.rs", year % 2000, day);
     let day_lib_path = Path::new(&day_lib_path);
 
     if !global_library_path.exists() {
@@ -64,7 +64,7 @@ fn generate(year: u32, day: u32, tasks: u32) {
     }
 
     for task in 1..=tasks {
-        let id = format!("y{}d{}t{}", year % 2000, day, task);
+        let id = format!("y{}d{:02}t{}", year % 2000, day, task);
 
         let bin_path = format!("src/bin/{id}.rs");
         let bin_path = Path::new(&bin_path);
@@ -77,7 +77,7 @@ fn generate(year: u32, day: u32, tasks: u32) {
 
     {
         let mut modules = get_modules(global_library_path);
-        let module_name = format!("y{}d{}", year % 2000, day);
+        let module_name = format!("y{}d{:02}", year % 2000, day);
         if !modules.contains(&module_name) {
             modules.push(module_name);
             modules.sort();
@@ -90,7 +90,7 @@ fn generate(year: u32, day: u32, tasks: u32) {
 
     {
         if !day_lib_path.exists() {
-            let content = get_day_lib_content(tasks);
+            let content = get_day_lib_content(year, day, tasks);
             fs::write(day_lib_path, content).unwrap();
         } else {
             println!("Day lib already exists")
@@ -98,7 +98,7 @@ fn generate(year: u32, day: u32, tasks: u32) {
     }
 }
 
-fn get_day_lib_content(tasks: u32) -> String {
+fn get_day_lib_content(year: u32, day: u32, tasks: u32) -> String {
     let mut res = String::new();
     for task in 1..=tasks {
         let fun = format!(
@@ -114,9 +114,13 @@ fn get_day_lib_content(tasks: u32) -> String {
     res.push_str("mod tests {\n");
     res.push_str("    use super::*;\n");
     res.push_str("    const INPUT: &str = \"\";\n");
+    let actual_file_path = format!("../benches/y{}d{:02}.txt", year, day);
+    res.push_str("    const ACTUAL: &str = include_str!(\"");
+    res.push_str(&actual_file_path);
+    res.push_str("\");");
     for task in 1..=tasks {
         let mut test = String::new();
-        test.push_str("    #[test]\n");
+        test.push_str("\n    #[test]\n");
         test.push_str("    fn test_task");
         let num = task.to_string();
         test.push_str(&num);
@@ -124,6 +128,16 @@ fn get_day_lib_content(tasks: u32) -> String {
         test.push_str("        assert_eq!(format!(\"{}\", solve_task");
         test.push_str(&num);
         test.push_str("(INPUT)), \"0\");\n");
+        test.push_str("    }\n");
+
+        test.push_str("\n    #[test]\n");
+        test.push_str("    fn test_task");
+        let num = task.to_string();
+        test.push_str(&num);
+        test.push_str("_actual() {\n");
+        test.push_str("        assert_eq!(format!(\"{}\", solve_task");
+        test.push_str(&num);
+        test.push_str("(ACTUAL)), \"0\");\n");
         test.push_str("    }\n");
         res.push_str(&test);
     }
@@ -153,7 +167,7 @@ fn get_modules(global_library_path: &Path) -> Vec<String> {
 
 fn get_bin_content(year: u32, day: u32, task: u32) -> String {
     format!(
-        "use advent::y{year}d{day}::solve_task{task};
+        "use advent::y{year}d{day:02}::solve_task{task};
 use std::{{env::args, fs::read_to_string}};
 
 fn main() {{
@@ -168,7 +182,7 @@ fn main() {{
 }
 
 fn generate_bench(year: u32, day: u32, tasks: u32) {
-    let bench_name = format!("y{}d{}", year % 2000, day);
+    let bench_name = format!("y{}d{:02}", year % 2000, day);
     add_bench_to_toml(&bench_name);
     let input_file_name = format!("benches/{bench_name}.txt");
     fs::write(&input_file_name, "").unwrap();
@@ -187,7 +201,7 @@ fn add_bench_to_toml(bench_name: &str) {
 fn get_bench_code(year: u32, day: u32, tasks: u32) -> String {
     let mut res = String::new();
     writeln!(&mut res, "use std::fs;").unwrap();
-    let lib = format!("y{}d{}", year % 2000, day);
+    let lib = format!("y{}d{:02}", year % 2000, day);
     write!(&mut res, "use advent::{lib}::{{",).unwrap();
     for task in 1..=tasks {
         if task > 1 {
@@ -228,5 +242,11 @@ mod tests {
     fn test_get_gench_code() {
         let res = get_bench_code(2022, 26, 2);
         assert_eq!("use std::fs;\nuse advent::y22d26::{solve_task1, solve_task2};\nuse criterion::{black_box, criterion_group, criterion_main, Criterion};\n\npub fn criterion_benchmark(c: &mut Criterion) {\n    let content = fs::read_to_string(\"./benches/y22d26.txt\").unwrap();\n    c.bench_function(\"solve 1\", |b| b.iter(|| solve_task1(black_box(&content))));\n    c.bench_function(\"solve 2\", |b| b.iter(|| solve_task2(black_box(&content))));\n}\n\ncriterion_group!(benches, criterion_benchmark);\ncriterion_main!(benches);\n", res.as_str())
+    }
+
+    #[test]
+    fn test_name_creation() {
+        let x = 5;
+        assert_eq!(format!("{x:02}"), "05")
     }
 }
