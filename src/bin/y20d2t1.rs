@@ -1,4 +1,4 @@
-use advent::y20d2::solve_task1;
+use advent::y20d02::solve_task1;
 use std::{env::args, fs::read_to_string};
 
 fn main() {

@@ -1,4 +1,4 @@
-use advent::y22d8::{solve_task1, solve_task2};
+use advent::y22d08::{solve_task1, solve_task2};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use std::fs;
 

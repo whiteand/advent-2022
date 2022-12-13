@@ -1,6 +1,6 @@
 use std::fs;
 
-use advent::y22d4::{solve_task1, solve_task2};
+use advent::y22d04::{solve_task1, solve_task2};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 pub fn criterion_benchmark(c: &mut Criterion) {
