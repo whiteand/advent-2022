@@ -2,6 +2,7 @@ pub mod day1;
 pub mod day2;
 pub mod day3;
 pub mod reduces;
+pub mod y15d01;
 pub mod y20d01;
 pub mod y20d02;
 pub mod y22d04;
