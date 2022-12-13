@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 criterion = "0.4.0"
 itertools = "0.10.5"
+md-5 = "0.10.5"
 nom = "7.1.1"
 regex="1"
 
@@ -62,4 +63,8 @@ harness = false
 
 [[bench]]
 name = "y15d03"
+harness = false
+
+[[bench]]
+name = "y15d04"
 harness = false

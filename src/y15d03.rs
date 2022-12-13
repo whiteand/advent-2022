@@ -41,6 +41,7 @@ pub fn solve<const N: usize>(file_content: &str) -> usize {
 mod tests {
     use super::*;
     const ACTUAL: &str = include_str!("../benches/y15d03.txt");
+
     #[test]
     #[ignore]
     fn test_task1() {
