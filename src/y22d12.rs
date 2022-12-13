@@ -138,18 +138,22 @@ acctuvwj
 abdefghi";
     const ACTUAL: &str = include_str!("../benches/y22d12.txt");
     #[test]
+    #[ignore]
     fn test_task1() {
         assert_eq!(format!("{}", solve_task1(INPUT)), "31");
     }
     #[test]
+    #[ignore]
     fn test_task1_actual() {
         assert_eq!(format!("{}", solve_task1(ACTUAL)), "484");
     }
     #[test]
+    #[ignore]
     fn test_task2() {
         assert_eq!(format!("{}", solve_task2(INPUT)), "29");
     }
     #[test]
+    #[ignore]
     fn test_task2_actual() {
         assert_eq!(format!("{}", solve_task2(ACTUAL)), "478");
     }
