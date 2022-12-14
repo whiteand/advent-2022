@@ -1,6 +1,6 @@
-use std::fs;
 use advent::y15d04::{solve_task1, solve_task2};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use std::fs;
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     let content = fs::read_to_string("./benches/y15d04.txt").unwrap();
