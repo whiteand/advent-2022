@@ -130,7 +130,7 @@ fn get_day_lib_content(year: u32, day: u32, tasks: u32) -> String {
     res.push_str("mod tests {\n");
     res.push_str("    use super::*;\n");
     res.push_str("    const INPUT: &str = include_str!(\"");
-    let example_file_path = format!("./y{}d{:02}/example.txt", year, day);
+    let example_file_path = format!("./y{}d{:02}/example.txt", year % 1000, day);
     res.push_str(&example_file_path);
     res.push_str("\");\n");
     let actual_file_path = format!("../benches/y{}d{:02}.txt", year % 1000, day);
