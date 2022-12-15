@@ -1,5 +1,5 @@
-use std::cmp::Ordering::*;
 use std::ops::RangeInclusive;
+use std::{cmp::Ordering::*, collections::BTreeSet};
 
 use nom::{
     bytes::complete::tag,
@@ -61,8 +61,6 @@ impl Measurement {
             } else {
                 unreachable!()
             }
-        } else if self.sensor.1 == y {
-            todo!("Handle special case: the same line as sensor")
         } else {
             let start = self.sensor.0 - measurement_distance + distance_to_y;
             let end = self.sensor.0 + measurement_distance - distance_to_y;
@@ -75,6 +73,57 @@ pub fn solve_task1(file_content: &str, row: i32) -> usize {
     let measurements: Vec<_> = parse_measurements(file_content).collect();
     let restricted_ranges = get_restricted_ranges(&measurements, row);
     restricted_ranges.into_iter().map(|r| r.count()).sum()
+}
+
+pub fn solve_task2(
+    file_content: &str,
+    x_range: RangeInclusive<i32>,
+    y_range: RangeInclusive<i32>,
+) -> u64 {
+    let measurements: Vec<_> = parse_measurements(file_content).collect();
+    if let Some((x, y)) = find_beacon(&measurements, x_range, y_range) {
+        (x as u64) * 4000000 + (y as u64)
+    } else {
+        0
+    }
+}
+fn find_beacon(
+    measurements: &[Measurement],
+    x_range: RangeInclusive<i32>,
+    y_range: RangeInclusive<i32>,
+) -> Option<(i32, i32)> {
+    let beacons = measurements
+        .iter()
+        .map(|m| m.beacon)
+        .collect::<BTreeSet<_>>();
+
+    for y in y_range {
+        let restricted_ranges = get_restricted_ranges(&measurements, y)
+            .iter()
+            .flat_map(|r| r.intersection_with(&x_range))
+            .collect::<Vec<_>>();
+        let mut x = *x_range.start();
+        let mut current_range_index = 0;
+        let max_x = *x_range.end();
+        while x <= max_x {
+            let p = (x, y);
+            if beacons.contains(&p) {
+                x += 1;
+                continue;
+            }
+            if restricted_ranges
+                .get(current_range_index)
+                .map(|r| r.contains(&x))
+                .unwrap_or(false)
+            {
+                x = *restricted_ranges[current_range_index].end() + 1;
+                current_range_index += 1;
+                continue;
+            }
+            return Some(p);
+        }
+    }
+    None
 }
 
 fn get_restricted_ranges(measurements: &[Measurement], row: i32) -> Vec<RangeInclusive<i32>> {
@@ -112,10 +161,6 @@ fn get_restricted_ranges(measurements: &[Measurement], row: i32) -> Vec<RangeInc
     merged_ranges
 }
 
-pub fn solve_task2(file_content: &str) -> impl std::fmt::Display {
-    0
-}
-
 fn parse_measurements(file_content: &str) -> impl Iterator<Item = Measurement> + '_ {
     file_content
         .lines()
@@ -141,10 +186,22 @@ fn parse_point(input: &str) -> IResult<&str, (i32, i32)> {
 
 trait RangeOperations: Sized {
     fn merge_with(&self, other: &Self) -> Option<Self>;
+    fn intersection_with(&self, other: &Self) -> Option<Self>;
     fn len(&self) -> usize;
 }
 
 impl RangeOperations for RangeInclusive<i32> {
+    fn intersection_with(&self, other: &Self) -> Option<Self> {
+        if self.start().gt(other.end()) {
+            None
+        } else if self.end().lt(other.start()) {
+            None
+        } else {
+            let start = *self.start().max(other.start());
+            let end = *self.end().min(other.end());
+            Some(start..=end)
+        }
+    }
     fn merge_with(&self, other: &Self) -> Option<Self> {
         if *other.start() == *self.end() + 1 {
             let start = self.start().clone();
@@ -175,11 +232,13 @@ mod tests {
     const INPUT: &str = include_str!("./y22d15/example.txt");
     const ACTUAL: &str = include_str!("../benches/y22d15.txt");
     #[test]
+    #[ignore]
     fn test_task1() {
         assert_eq!(format!("{}", solve_task1(INPUT, 10)), "26");
     }
 
     #[test]
+    #[ignore]
     fn test_task1_actual() {
         assert_eq!(format!("{}", solve_task1(ACTUAL, 2000000)), "4907780");
     }
@@ -187,11 +246,18 @@ mod tests {
     #[test]
     #[ignore]
     fn test_task2() {
-        assert_eq!(format!("{}", solve_task2(INPUT)), "56000011");
+        assert_eq!(
+            format!("{}", solve_task2(INPUT, 0..=20, 0..=20)),
+            "56000011"
+        );
     }
 
     #[test]
+    #[ignore]
     fn test_task2_actual() {
-        assert_eq!(format!("{}", solve_task2(ACTUAL)), "0");
+        assert_eq!(
+            format!("{}", solve_task2(ACTUAL, 0..=4000000, 0..=4000000)),
+            "13639962836448"
+        );
     }
 }
