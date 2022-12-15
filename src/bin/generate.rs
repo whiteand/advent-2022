@@ -100,7 +100,15 @@ fn generate(year: u32, day: u32, tasks: u32) {
     {
         // Generate example folder
         let example_dir_path = format!("src/y{}d{:02}", year % 1000, day);
-        std::fs::create_dir(&example_dir_path).expect("cannot create an example folder");
+        match std::fs::create_dir(&example_dir_path) {
+            Ok(()) => {}
+            Err(e) => match e.raw_os_error() {
+                Some(17) => {}
+                _ => {
+                    println!("Cannot generate folder for example");
+                }
+            },
+        };
         let example_file_path = format!("{example_dir_path}/example.txt");
         std::fs::write(example_file_path, "").unwrap();
     }
