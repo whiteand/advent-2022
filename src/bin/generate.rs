@@ -96,6 +96,14 @@ fn generate(year: u32, day: u32, tasks: u32) {
             println!("Day lib already exists")
         }
     }
+
+    {
+        // Generate example folder
+        let example_dir_path = format!("src/y{}d{:02}", year % 1000, day);
+        std::fs::create_dir(&example_dir_path).expect("cannot create an example folder");
+        let example_file_path = format!("{example_dir_path}/example.txt");
+        std::fs::write(example_file_path, "").unwrap();
+    }
 }
 
 fn get_day_lib_content(year: u32, day: u32, tasks: u32) -> String {
@@ -113,7 +121,10 @@ fn get_day_lib_content(year: u32, day: u32, tasks: u32) -> String {
     res.push_str("#[cfg(test)]\n");
     res.push_str("mod tests {\n");
     res.push_str("    use super::*;\n");
-    res.push_str("    const INPUT: &str = \"\";\n");
+    res.push_str("    const INPUT: &str = include_str!(\"");
+    let example_file_path = format!("./y{}d{:02}/example.txt", year, day);
+    res.push_str(&example_file_path);
+    res.push_str("\");\n");
     let actual_file_path = format!("../benches/y{}d{:02}.txt", year % 1000, day);
     res.push_str("    const ACTUAL: &str = include_str!(\"");
     res.push_str(&actual_file_path);
