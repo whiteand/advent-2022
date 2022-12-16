@@ -1,5 +1,6 @@
 mod parse;
 mod part1;
+mod part2;
 mod shortest;
 mod step;
 mod valve;
@@ -8,7 +9,7 @@ pub fn solve_task1(file_content: &str, minutes: usize) -> usize {
     part1::solve_task1(file_content, minutes)
 }
 pub fn solve_task2(file_content: &str) -> usize {
-    0
+    part2::solve_task2(file_content, 26)
 }
 
 #[cfg(test)]
@@ -30,7 +31,7 @@ mod tests {
 
     #[test]
     fn test_task2() {
-        assert_eq!(format!("{}", solve_task2(INPUT)), "0");
+        assert_eq!(format!("{}", solve_task2(INPUT)), "1707");
     }
 
     #[test]
