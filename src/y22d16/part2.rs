@@ -1,8 +1,12 @@
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap};
 
-use super::{parse, shortest::precalculate_shortest_paths, valve::Valve};
+use super::{
+    parse,
+    shortest::{self, precalculate_shortest_paths},
+    valve::Valve,
+};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 enum Goal<'i> {
     Stay,
     Open(&'i str),
@@ -25,14 +29,20 @@ struct Node<'i> {
     elephant_goal: Option<Goal<'i>>,
     my_goal: Option<Goal<'i>>,
     me: &'i str,
-    open_by_me: Vec<&'i str>,
-    open_by_elephant: Vec<&'i str>,
     elephant: &'i str,
     open: BTreeSet<&'i str>,
 }
 
 type SP<'i> = BTreeMap<(&'i str, &'i str), Vec<&'i str>>;
 type VS<'i> = BTreeMap<&'i str, Valve<'i>>;
+
+fn shortest_path_len<'i>(shortest_paths: &SP<'i>, from: &'i str, to: &'i str) -> usize {
+    shortest_paths.get(&(from, to)).unwrap().len()
+}
+fn rate<'i>(valves: &VS<'i>, valve: &'i str) -> usize {
+    valves.get(valve).unwrap().rate as usize
+}
+
 impl<'i> Node<'i> {
     #[inline]
     fn min_final_cost(&self) -> usize {
@@ -45,7 +55,7 @@ impl<'i> Node<'i> {
     }
 
     fn do_move<'a>(&'a mut self, valves: &'a VS<'i>, shortest_paths: &'a SP<'i>) {
-        match (&self.my_goal, &self.elephant_goal) {
+        match (self.my_goal, self.elephant_goal) {
             (None, None) => unreachable!(),
             (None, Some(_)) => unreachable!(),
             (Some(_), None) => unreachable!(),
@@ -55,6 +65,7 @@ impl<'i> Node<'i> {
             }
             _ => {}
         }
+
         self.collected_pressure += self.flow;
         self.move_myself(valves, shortest_paths);
         self.move_elephant(valves, shortest_paths);
@@ -192,12 +203,7 @@ impl<'i> PartialOrd for Node<'i> {
 }
 impl<'i> Ord for Node<'i> {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        match (self.has_plan_and_time(), other.has_plan_and_time()) {
-            (true, true) => self.min_final_cost().cmp(&other.min_final_cost()),
-            (true, false) => std::cmp::Ordering::Less,
-            (false, true) => std::cmp::Ordering::Greater,
-            (false, false) => self.min_final_cost().cmp(&other.min_final_cost()),
-        }
+        self.min_final_cost().cmp(&other.min_final_cost())
     }
 }
 
@@ -209,8 +215,6 @@ impl<'i> Node<'i> {
             flow: 0,
             elephant_goal: None,
             my_goal: None,
-            open_by_elephant: Vec::new(),
-            open_by_me: Vec::new(),
             me,
             elephant,
             open: std::default::Default::default(),
@@ -228,6 +232,8 @@ pub(crate) fn solve_task2(file_content: &str, minutes: usize) -> usize {
 
     let mut max_pressure_collected = 0;
 
+    let mut best: BTreeMap<(&str, &str, usize), usize> = BTreeMap::new();
+
     let mut nodes = BinaryHeap::new();
     nodes.push(Node::new(minutes, "AA", "AA"));
     while let Some(mut node) = nodes.pop() {
@@ -236,10 +242,22 @@ pub(crate) fn solve_task2(file_content: &str, minutes: usize) -> usize {
         }
         if node.have_time() {
             for next_node in node.plan(&valves, &shortest_paths) {
+                let p = (
+                    next_node.me,
+                    next_node.elephant,
+                    next_node.remaining_minutes,
+                );
+                let best_flow = best.get(&p).map(|e| *e).unwrap_or_default();
+                if best_flow > next_node.flow {
+                    continue;
+                } else {
+                    best.insert(p, next_node.flow);
+                }
                 nodes.push(next_node)
             }
         } else {
             if node.collected_pressure > max_pressure_collected {
+                println!("{}", nodes.len());
                 println!("{:#?}", node);
                 max_pressure_collected = node.collected_pressure;
             }
