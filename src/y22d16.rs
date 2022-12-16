@@ -74,6 +74,13 @@ pub fn solve_task1(file_content: &str, minutes: usize) -> usize {
         .into_iter()
         .map(|valve| (valve.name, valve))
         .collect::<BTreeMap<_, _>>();
+    let shortest_paths = valves_map
+        .keys()
+        .cartesian_product(valves_map.keys())
+        .filter(|(k1, k2)| k1 != k2)
+        .flat_map(|(&from, &to)| get_shortest_path(&valves_map, from, to).map(|p| ((from, to), p)))
+        .collect::<BTreeMap<_, _>>();
+
     let mut tasks = vec![FullState {
         flow: 0,
         valve: "AA",
@@ -85,8 +92,11 @@ pub fn solve_task1(file_content: &str, minutes: usize) -> usize {
 
     let mut max_pressure_collected = 0;
     while let Some(mut task) = tasks.pop() {
+        if tasks.len() % 1000 == 0 {
+            println!("{}", tasks.len())
+        }
         let mut has_plans = false;
-        for possible_plan in get_possible_plans(&valves_map, &task) {
+        for possible_plan in get_possible_plans(&valves_map, &shortest_paths, &task) {
             has_plans = true;
             let mut new_state = task.clone();
             for m in possible_plan {
@@ -113,6 +123,7 @@ pub fn solve_task1(file_content: &str, minutes: usize) -> usize {
 
 fn get_possible_plans<'i>(
     valves_map: &BTreeMap<&'i str, valve::Valve<'i>>,
+    shortest_paths: &BTreeMap<(&'i str, &'i str), Vec<&'i str>>,
     state: &FullState<'i>,
 ) -> Vec<Vec<Move<'i>>> {
     if state.remaining_minutes <= 0 {
@@ -123,7 +134,11 @@ fn get_possible_plans<'i>(
         .iter()
         .filter(|(&n, v)| !state.open_valves.contains(n) && v.rate > 0)
         .map(|(k, _)| k)
-        .flat_map(|goal| get_shortest_path(valves_map, state.valve, goal))
+        .flat_map(|&goal| {
+            let dir = (state.valve, goal);
+            let shortest_path = shortest_paths.get(&dir);
+            shortest_path
+        })
         .filter(|path| path.len() < state.remaining_minutes)
         .map(|p| {
             p.into_iter()
