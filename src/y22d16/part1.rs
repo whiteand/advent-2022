@@ -1,27 +1,32 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use super::{parse, shortest::precalculate_shortest_paths, step::Step, valve};
+use super::{
+    parse::{self, parse_id},
+    shortest::precalculate_shortest_paths,
+    step::Step,
+    valve::{self, Valve},
+};
 
 #[derive(Debug, Clone)]
-struct FullState<'i> {
+struct FullState {
     pub flow: usize,
-    pub valve: &'i str,
-    pub open_valves: BTreeSet<&'i str>,
+    pub valve: usize,
+    pub open_valves: BTreeSet<usize>,
     pub collected_pressure: usize,
     pub remaining_minutes: usize,
-    pub moves: Vec<Step<'i>>,
+    pub moves: Vec<Step>,
 }
 
-impl<'i> FullState<'i> {
-    fn make_move_mutably(&mut self, valves: &BTreeMap<&str, valve::Valve>, m: Step<'i>) {
+impl FullState {
+    fn make_move_mutably(&mut self, valves: &BTreeMap<usize, valve::Valve>, m: Step) {
         self.collected_pressure += self.flow;
         match &m {
             Step::GoTo(new_valve) => {
-                self.valve = new_valve;
+                self.valve = *new_valve;
             }
             Step::Open => {
                 self.open_valves.insert(self.valve);
-                let current_valve = valves.get(self.valve).unwrap();
+                let current_valve = valves.get(&self.valve).unwrap();
 
                 self.flow += current_valve.rate as usize;
             }
@@ -50,7 +55,7 @@ pub fn solve_task1(file_content: &str, minutes: usize) -> usize {
 
     let mut tasks = vec![FullState {
         flow: 0,
-        valve: "AA",
+        valve: parse_id("AA").unwrap().1,
         remaining_minutes: minutes,
         open_valves: Default::default(),
         collected_pressure: 0,
@@ -80,18 +85,18 @@ pub fn solve_task1(file_content: &str, minutes: usize) -> usize {
     max_pressure_collected
 }
 
-fn get_possible_plans<'i>(
-    valves_map: &BTreeMap<&'i str, valve::Valve<'i>>,
-    shortest_paths: &BTreeMap<(&'i str, &'i str), Vec<&'i str>>,
-    state: &FullState<'i>,
-) -> Vec<Vec<Step<'i>>> {
+fn get_possible_plans(
+    valves_map: &BTreeMap<usize, Valve>,
+    shortest_paths: &BTreeMap<(usize, usize), Vec<usize>>,
+    state: &FullState,
+) -> Vec<Vec<Step>> {
     if state.remaining_minutes <= 0 {
         return Vec::new();
     }
 
     valves_map
         .iter()
-        .filter(|(&n, v)| !state.open_valves.contains(n) && v.rate > 0)
+        .filter(|(n, v)| !state.open_valves.contains(n) && v.rate > 0)
         .map(|(k, _)| k)
         .flat_map(|&goal| {
             let dir = (state.valve, goal);
@@ -101,7 +106,7 @@ fn get_possible_plans<'i>(
         .filter(|path| path.len() < state.remaining_minutes)
         .map(|p| {
             p.into_iter()
-                .map(|valve| Step::GoTo(valve))
+                .map(|valve| Step::GoTo(*valve))
                 .chain(std::iter::once(Step::Open))
                 .collect()
         })

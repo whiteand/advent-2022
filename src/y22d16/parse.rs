@@ -29,14 +29,25 @@ fn parse_valve(line: &str) -> IResult<&str, Valve> {
     )(line)
 }
 
-fn parse_name(line: &str) -> IResult<&str, &str> {
-    preceded(tag("Valve "), alpha1)(line)
+fn parse_name(line: &str) -> IResult<&str, usize> {
+    preceded(tag("Valve "), parse_id)(line)
 }
+
+pub fn parse_id(line: &str) -> IResult<&str, usize> {
+    let (input, letters) = alpha1(line)?;
+    let mut res: usize = 0;
+    for ch in letters.as_bytes().iter() {
+        res = res << 8;
+        res |= (*ch) as usize;
+    }
+    Ok((input, res))
+}
+
 fn parse_rate(input: &str) -> IResult<&str, u32> {
     preceded(tag(" has flow rate="), character::complete::u32)(input)
 }
-fn parse_paths(input: &str) -> IResult<&str, Vec<&str>> {
-    let parse_list = separated_list1(tag(", "), alpha1);
+fn parse_paths(input: &str) -> IResult<&str, Vec<usize>> {
+    let parse_list = separated_list1(tag(", "), parse_id);
     preceded(
         alt((
             tag("; tunnel leads to valve "),

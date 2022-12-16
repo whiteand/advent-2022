@@ -1,18 +1,18 @@
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap};
 
 use super::{
-    parse,
+    parse::{self, parse_id},
     shortest::{self, precalculate_shortest_paths},
     valve::Valve,
 };
 
 #[derive(Debug, Clone, Copy)]
-enum Goal<'i> {
+enum Goal {
     Stay,
-    Open(&'i str),
+    Open(usize),
 }
 
-impl std::fmt::Display for Goal<'_> {
+impl std::fmt::Display for Goal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Goal::Stay => write!(f, "..."),
@@ -22,28 +22,28 @@ impl std::fmt::Display for Goal<'_> {
 }
 
 #[derive(Debug, Clone)]
-struct Node<'i> {
+struct Node {
     remaining_minutes: usize,
     collected_pressure: usize,
     flow: usize,
-    elephant_goal: Option<Goal<'i>>,
-    my_goal: Option<Goal<'i>>,
-    me: &'i str,
-    elephant: &'i str,
-    open: BTreeSet<&'i str>,
+    elephant_goal: Option<Goal>,
+    my_goal: Option<Goal>,
+    me: usize,
+    elephant: usize,
+    open: BTreeSet<usize>,
 }
 
-type SP<'i> = BTreeMap<(&'i str, &'i str), Vec<&'i str>>;
-type VS<'i> = BTreeMap<&'i str, Valve<'i>>;
+type SP = BTreeMap<(usize, usize), Vec<usize>>;
+type VS = BTreeMap<usize, Valve>;
 
-fn shortest_path_len<'i>(shortest_paths: &SP<'i>, from: &'i str, to: &'i str) -> usize {
+fn shortest_path_len(shortest_paths: &SP, from: usize, to: usize) -> usize {
     shortest_paths.get(&(from, to)).unwrap().len()
 }
-fn rate<'i>(valves: &VS<'i>, valve: &'i str) -> usize {
-    valves.get(valve).unwrap().rate as usize
+fn rate(valves: &VS, valve: usize) -> usize {
+    valves.get(&valve).unwrap().rate as usize
 }
 
-impl<'i> Node<'i> {
+impl Node {
     #[inline]
     fn min_final_cost(&self) -> usize {
         self.flow * self.remaining_minutes + self.collected_pressure
@@ -54,7 +54,7 @@ impl<'i> Node<'i> {
         self.my_goal.is_some() && self.elephant_goal.is_some() && self.have_time()
     }
 
-    fn do_move<'a>(&'a mut self, valves: &'a VS<'i>, shortest_paths: &'a SP<'i>) {
+    fn do_move<'a>(&'a mut self, valves: &'a VS, shortest_paths: &'a SP) {
         match (self.my_goal, self.elephant_goal) {
             (None, None) => unreachable!(),
             (None, Some(_)) => unreachable!(),
@@ -71,12 +71,12 @@ impl<'i> Node<'i> {
         self.move_elephant(valves, shortest_paths);
         self.remaining_minutes -= 1;
     }
-    fn open_valve<'a>(&mut self, valves: &'a VS<'i>, valve: &'i str) {
+    fn open_valve<'a>(&mut self, valves: &'a VS, valve: usize) {
         self.open.insert(valve);
-        self.flow += valves.get(valve).unwrap().rate as usize;
+        self.flow += valves.get(&valve).unwrap().rate as usize;
     }
 
-    fn move_elephant<'a>(&'a mut self, valves: &'a VS<'i>, shortest_paths: &'a SP<'i>) {
+    fn move_elephant<'a>(&'a mut self, valves: &'a VS, shortest_paths: &'a SP) {
         match self.elephant_goal {
             Some(Goal::Stay) => {}
             Some(Goal::Open(goal_valve)) => {
@@ -86,7 +86,7 @@ impl<'i> Node<'i> {
                 } else {
                     match shortest_paths.get(&(self.elephant, goal_valve)) {
                         Some(p) => {
-                            let first = p.first().unwrap();
+                            let first = *p.first().unwrap();
                             self.elephant = first;
                         }
                         None => unreachable!(),
@@ -102,7 +102,7 @@ impl<'i> Node<'i> {
         self.remaining_minutes = 0;
     }
 
-    fn move_myself<'a>(&'a mut self, valves: &'a VS<'i>, shortest_paths: &'a SP<'i>) {
+    fn move_myself<'a>(&'a mut self, valves: &'a VS, shortest_paths: &'a SP) {
         match self.my_goal {
             Some(Goal::Stay) => {}
             Some(Goal::Open(goal_valve)) => {
@@ -112,7 +112,7 @@ impl<'i> Node<'i> {
                 } else {
                     match shortest_paths.get(&(self.me, goal_valve)) {
                         Some(p) => {
-                            let first = p.first().unwrap();
+                            let first = *p.first().unwrap();
                             self.me = first;
                         }
                         None => unreachable!(),
@@ -122,7 +122,7 @@ impl<'i> Node<'i> {
             None => unreachable!(),
         }
     }
-    fn plan(&mut self, valves: &VS<'i>, shortest_paths: &SP<'i>) -> Vec<Self> {
+    fn plan(&mut self, valves: &VS, shortest_paths: &SP) -> Vec<Self> {
         let mut res = Vec::new();
         if self.my_goal.is_none() {
             for valve in self
@@ -162,22 +162,22 @@ impl<'i> Node<'i> {
         res
     }
 
-    fn is_open(&self, key: &'i str) -> bool {
+    fn is_open(&self, key: usize) -> bool {
         self.open.contains(&key)
     }
 
     fn interesting_valves<'a>(
         &'a self,
-        valves: &'a BTreeMap<&'i str, Valve<'i>>,
-        shortest_paths: &'a BTreeMap<(&'i str, &'i str), Vec<&'i str>>,
-        place: &'i str,
-    ) -> impl Iterator<Item = &'i str> + '_ {
+        valves: &'a BTreeMap<usize, Valve>,
+        shortest_paths: &'a BTreeMap<(usize, usize), Vec<usize>>,
+        place: usize,
+    ) -> impl Iterator<Item = usize> + '_ {
         valves
             .iter()
             .filter(|(_, v)| v.rate > 0)
             .map(|(k, _)| *k)
-            .filter(|k| !self.is_open(k))
-            .filter(|goal| match shortest_paths.get(&(place, goal)) {
+            .filter(|&k| !self.is_open(k))
+            .filter(move |goal| match shortest_paths.get(&(place, *goal)) {
                 Some(p) => p.len() < self.remaining_minutes,
                 None => false,
             })
@@ -189,26 +189,26 @@ impl<'i> Node<'i> {
     }
 }
 
-impl<'i> PartialEq for Node<'i> {
+impl PartialEq for Node {
     fn eq(&self, other: &Self) -> bool {
         self.min_final_cost() == other.min_final_cost()
     }
 }
-impl<'i> Eq for Node<'i> {}
+impl Eq for Node {}
 
-impl<'i> PartialOrd for Node<'i> {
+impl PartialOrd for Node {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
-impl<'i> Ord for Node<'i> {
+impl Ord for Node {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.min_final_cost().cmp(&other.min_final_cost())
     }
 }
 
-impl<'i> Node<'i> {
-    fn new(remaining_minutes: usize, me: &'i str, elephant: &'i str) -> Self {
+impl Node {
+    fn new(remaining_minutes: usize, me: usize, elephant: usize) -> Self {
         Self {
             remaining_minutes,
             collected_pressure: 0,
@@ -232,10 +232,11 @@ pub(crate) fn solve_task2(file_content: &str, minutes: usize) -> usize {
 
     let mut max_pressure_collected = 0;
 
-    let mut best: BTreeMap<(&str, &str, usize), usize> = BTreeMap::new();
+    let mut best: BTreeMap<(usize, usize, usize), usize> = BTreeMap::new();
 
     let mut nodes = BinaryHeap::new();
-    nodes.push(Node::new(minutes, "AA", "AA"));
+    let initial_id = parse_id("AA").unwrap().1;
+    nodes.push(Node::new(minutes, initial_id, initial_id));
     while let Some(mut node) = nodes.pop() {
         while node.has_plan_and_time() {
             node.do_move(&valves, &shortest_paths);

@@ -1,6 +1,6 @@
 #[derive(Debug)]
-pub struct Valve<'i> {
+pub struct Valve {
     pub rate: u32,
-    pub paths: Vec<&'i str>,
-    pub name: &'i str,
+    pub paths: Vec<usize>,
+    pub name: usize,
 }
