@@ -257,8 +257,6 @@ pub(crate) fn solve_task2(file_content: &str, minutes: usize) -> usize {
             }
         } else {
             if node.collected_pressure > max_pressure_collected {
-                println!("{}", nodes.len());
-                println!("{:#?}", node);
                 max_pressure_collected = node.collected_pressure;
             }
         }

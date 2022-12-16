@@ -36,6 +36,6 @@ mod tests {
 
     #[test]
     fn test_task2_actual() {
-        assert_eq!(format!("{}", solve_task2(ACTUAL)), "0");
+        assert_eq!(format!("{}", solve_task2(ACTUAL)), "2304");
     }
 }
