@@ -1,7 +1,7 @@
 mod parse;
 mod valve;
 use itertools::Itertools;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use parse::parse;
 
@@ -36,22 +36,31 @@ impl<'i> FullState<'i> {
     fn make_move(&self, valves: &BTreeMap<&str, valve::Valve>, m: Move<'i>) -> FullState<'i> {
         let mut res = self.clone();
 
-        res.collected_pressure += self.flow;
+        res.make_move_mutably(valves, m);
+
+        res
+    }
+    fn make_move_mutably(&mut self, valves: &BTreeMap<&str, valve::Valve>, m: Move<'i>) {
+        self.collected_pressure += self.flow;
         match &m {
             Move::GoTo(new_valve) => {
-                res.valve = new_valve;
+                self.valve = new_valve;
             }
             Move::Open => {
-                res.open_valves.insert(res.valve);
-                let current_valve = valves.get(res.valve).unwrap();
+                self.open_valves.insert(self.valve);
+                let current_valve = valves.get(self.valve).unwrap();
 
-                res.flow += current_valve.rate as usize;
+                self.flow += current_valve.rate as usize;
             }
             Move::Stay => {}
         }
-        res.remaining_minutes -= 1;
-        res.moves.push(m);
-        res
+        self.remaining_minutes -= 1;
+        self.moves.push(m);
+    }
+
+    fn burn(&mut self) {
+        self.collected_pressure += self.remaining_minutes * self.flow;
+        self.remaining_minutes = 0;
     }
 
     fn approximate_quality(&self) -> usize {
@@ -75,69 +84,78 @@ pub fn solve_task1(file_content: &str, minutes: usize) -> usize {
     }];
 
     let mut max_pressure_collected = 0;
-    while let Some(task) = tasks.pop() {
-        let mut has_moves = false;
-        for possible_move in get_possible_moves(&valves_map, &task, minutes as usize) {
-            has_moves = true;
-            let new_state = task.make_move(&valves_map, possible_move);
+    while let Some(mut task) = tasks.pop() {
+        let mut has_plans = false;
+        for possible_plan in get_possible_plans(&valves_map, &task) {
+            has_plans = true;
+            let mut new_state = task.clone();
+            for m in possible_plan {
+                new_state.make_move_mutably(&valves_map, m);
+            }
             tasks.push(new_state);
         }
-        if has_moves {
+        if !has_plans {
+            task.burn();
+            if task.collected_pressure > max_pressure_collected {
+                println!(
+                    "rem:\t{}, col: {}, val: {}, flow: {}",
+                    task.remaining_minutes, task.collected_pressure, task.valve, task.flow
+                );
+                println!("{}", task.moves.iter().map(|m| format!("{}", m)).join(" "));
+                max_pressure_collected = task.collected_pressure;
+            }
+        } else {
             tasks.sort_by_key(|x| x.approximate_quality());
-        }
-        if task.remaining_minutes <= 0 && task.collected_pressure > max_pressure_collected {
-            println!(
-                "rem:\t{}, col: {}, val: {}, flow: {}",
-                task.remaining_minutes, task.collected_pressure, task.valve, task.flow
-            );
-            println!("{}", task.moves.iter().map(|m| format!("{}", m)).join(" "));
-            max_pressure_collected = task.collected_pressure;
         }
     }
     max_pressure_collected
 }
 
-fn get_possible_moves<'i>(
-    valves_map: &BTreeMap<&str, valve::Valve<'i>>,
+fn get_possible_plans<'i>(
+    valves_map: &BTreeMap<&'i str, valve::Valve<'i>>,
     state: &FullState<'i>,
-    minutes: usize,
-) -> Vec<Move<'i>> {
+) -> Vec<Vec<Move<'i>>> {
     if state.remaining_minutes <= 0 {
         return Vec::new();
     }
 
-    let mut res = Vec::new();
+    valves_map
+        .iter()
+        .filter(|(&n, v)| !state.open_valves.contains(n) && v.rate > 0)
+        .map(|(k, _)| k)
+        .flat_map(|goal| get_shortest_path(valves_map, state.valve, goal))
+        .filter(|path| path.len() < state.remaining_minutes)
+        .map(|p| {
+            p.into_iter()
+                .map(|valve| Move::GoTo(valve))
+                .chain(std::iter::once(Move::Open))
+                .collect()
+        })
+        .collect()
+}
 
-    for neighbour in valves_map.get(&state.valve).unwrap().paths.iter() {
-        let been_there = state
-            .moves
-            .iter()
-            .rev()
-            .take_while(|m| match m {
-                Move::GoTo(_) => true,
-                Move::Open => false,
-                Move::Stay => true,
-            })
-            .find(|m| match m {
-                Move::GoTo(s) => s == neighbour,
-                Move::Open => false,
-                Move::Stay => false,
-            })
-            .is_some();
-        if been_there {
-            continue;
+fn get_shortest_path<'i>(
+    valves_map: &BTreeMap<&str, valve::Valve<'i>>,
+    from: &'i str,
+    to: &'i str,
+) -> Option<Vec<&'i str>> {
+    let mut tasks: VecDeque<Vec<&str>> = VecDeque::new();
+    tasks.push_back(Vec::new());
+    while let Some(task) = tasks.pop_front() {
+        let current = task.iter().last().unwrap_or(&from);
+        if current.eq(&to) {
+            return Some(task);
         }
-        res.push(Move::GoTo(neighbour));
+        for neighbour in &valves_map.get(current).unwrap().paths {
+            if current.contains(neighbour) {
+                continue;
+            }
+            let mut new_task = task.clone();
+            new_task.push(neighbour);
+            tasks.push_back(new_task);
+        }
     }
-    if res.len() <= 0 {
-        res.push(Move::Stay);
-    }
-    if !state.open_valves.contains(&state.valve) && valves_map.get(&state.valve).unwrap().rate != 0
-    {
-        res.push(Move::Open);
-    }
-
-    return res;
+    None
 }
 
 pub fn solve_task2(file_content: &str) -> impl std::fmt::Display {
