@@ -1,5 +1,6 @@
 use super::{figure::Figure, placed_figure::PlacedFigure, vector::Vector};
 
+#[derive(Debug, Clone)]
 pub struct Chamber<'i> {
     pub placed: Vec<PlacedFigure<'i>>,
     width: usize,
@@ -24,8 +25,8 @@ impl<'i> Chamber<'i> {
             .map(|v| v.y + left_bottom.y)
             .max()
             .unwrap();
-        if max_y >= self.height {
-            self.height = max_y + 1;
+        if max_y as usize >= self.height {
+            self.height = (max_y as usize) + 1;
         }
         self.placed.push(PlacedFigure {
             figure,
@@ -35,16 +36,26 @@ impl<'i> Chamber<'i> {
     pub fn height(&self) -> usize {
         self.height
     }
+    pub fn width(&self) -> usize {
+        self.width
+    }
     pub fn taken(&self) -> impl Iterator<Item = Vector> + '_ {
         self.placed
             .iter()
             .flat_map(|pf| pf.figure.points.iter().map(|v| v.plus(&pf.left_bottom)))
     }
-    pub fn print(&self) {
+    pub fn print(&self, moved_figure: Option<(&Figure, Vector)>) {
         let mut screen = vec![vec!['.'; self.width]; self.height];
 
         for Vector { x, y } in self.taken() {
-            screen[y][x] = '#';
+            screen[y as usize][x as usize] = '#';
+        }
+
+        for Vector { x, y } in moved_figure
+            .into_iter()
+            .flat_map(|(fig, pos)| fig.points.iter().map(move |v| v.plus(&pos)))
+        {
+            screen[y as usize][x as usize] = '@';
         }
 
         screen.reverse();

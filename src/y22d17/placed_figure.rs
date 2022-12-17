@@ -1,6 +1,7 @@
 use super::figure::Figure;
 use super::vector::Vector;
 
+#[derive(Debug, Clone)]
 pub struct PlacedFigure<'i> {
     pub figure: &'i Figure,
     pub left_bottom: Vector,

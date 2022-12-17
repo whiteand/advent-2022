@@ -2,6 +2,7 @@
 pub enum Direction {
     Left,
     Right,
+    Down,
 }
 
 impl std::fmt::Debug for Direction {
@@ -9,6 +10,7 @@ impl std::fmt::Debug for Direction {
         match self {
             Self::Left => write!(f, "<"),
             Self::Right => write!(f, ">"),
+            Self::Down => write!(f, "v"),
         }
     }
 }
@@ -20,6 +22,7 @@ impl TryFrom<char> for Direction {
         match value {
             '<' => Ok(Direction::Left),
             '>' => Ok(Direction::Right),
+            'v' => Ok(Direction::Down),
             _ => Err("invalid direction char".to_owned()),
         }
     }

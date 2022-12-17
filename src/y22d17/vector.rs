@@ -1,11 +1,11 @@
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Vector {
-    pub x: usize,
-    pub y: usize,
+    pub x: isize,
+    pub y: isize,
 }
 
 impl Vector {
-    pub fn new(x: usize, y: usize) -> Self {
+    pub fn new(x: isize, y: isize) -> Self {
         Self { x, y }
     }
     pub fn plus(&self, other: &Self) -> Self {
@@ -31,8 +31,8 @@ impl std::fmt::Debug for Vector {
     }
 }
 
-impl From<(usize, usize)> for Vector {
-    fn from((x, y): (usize, usize)) -> Self {
+impl From<(isize, isize)> for Vector {
+    fn from((x, y): (isize, isize)) -> Self {
         Self { x, y }
     }
 }
