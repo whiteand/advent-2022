@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet, BinaryHeap};
 
 use super::{
     parse::{self, parse_id},
-    shortest::{self, precalculate_shortest_paths},
+    shortest::precalculate_shortest_paths,
     valve::Valve,
 };
 
@@ -35,13 +35,6 @@ struct Node {
 
 type SP = BTreeMap<(usize, usize), Vec<usize>>;
 type VS = BTreeMap<usize, Valve>;
-
-fn shortest_path_len(shortest_paths: &SP, from: usize, to: usize) -> usize {
-    shortest_paths.get(&(from, to)).unwrap().len()
-}
-fn rate(valves: &VS, valve: usize) -> usize {
-    valves.get(&valve).unwrap().rate as usize
-}
 
 impl Node {
     #[inline]

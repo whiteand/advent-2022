@@ -1,9 +1,9 @@
-mod parse;
+pub mod parse;
 mod part1;
 mod part2;
 mod shortest;
 mod step;
-mod valve;
+pub mod valve;
 
 pub fn solve_task1(file_content: &str, minutes: usize) -> usize {
     part1::solve_task1(file_content, minutes)
@@ -30,11 +30,13 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn test_task2() {
         assert_eq!(format!("{}", solve_task2(INPUT)), "1707");
     }
 
     #[test]
+    #[ignore]
     fn test_task2_actual() {
         assert_eq!(format!("{}", solve_task2(ACTUAL)), "2304");
     }

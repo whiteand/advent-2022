@@ -43,8 +43,8 @@ pub fn parse_id(line: &str) -> IResult<&str, usize> {
     Ok((input, res))
 }
 
-fn parse_rate(input: &str) -> IResult<&str, u32> {
-    preceded(tag(" has flow rate="), character::complete::u32)(input)
+fn parse_rate(input: &str) -> IResult<&str, u16> {
+    preceded(tag(" has flow rate="), character::complete::u16)(input)
 }
 fn parse_paths(input: &str) -> IResult<&str, Vec<usize>> {
     let parse_list = separated_list1(tag(", "), parse_id);
