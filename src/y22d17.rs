@@ -1,11 +1,20 @@
+mod chamber;
+mod direction;
 mod figure;
 mod get_figures;
+mod parse;
+mod placed_figure;
+mod vector;
 
 use get_figures::get_figures;
 
+use self::{chamber::Chamber, vector::Vector};
+
 pub fn solve_task1<const W: usize>(file_content: &str) -> usize {
     let figures = get_figures();
-    dbg!(W, figures);
+    let dirs = parse::parse(file_content).collect::<Vec<_>>();
+    let mut chamber = Chamber::new(W);
+
     0
 }
 pub fn solve_task2(file_content: &str) -> impl std::fmt::Display {
