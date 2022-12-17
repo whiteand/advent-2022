@@ -1,4 +1,11 @@
-pub fn solve_task1(file_content: &str) -> impl std::fmt::Display {
+mod figure;
+mod get_figures;
+
+use get_figures::get_figures;
+
+pub fn solve_task1<const W: usize>(file_content: &str) -> usize {
+    let figures = get_figures();
+    dbg!(W, figures);
     0
 }
 pub fn solve_task2(file_content: &str) -> impl std::fmt::Display {
@@ -11,12 +18,12 @@ mod tests {
     const ACTUAL: &str = include_str!("../benches/y22d17.txt");
     #[test]
     fn test_task1() {
-        assert_eq!(format!("{}", solve_task1(INPUT)), "0");
+        assert_eq!(format!("{}", solve_task1::<7>(INPUT)), "3068");
     }
 
     #[test]
     fn test_task1_actual() {
-        assert_eq!(format!("{}", solve_task1(ACTUAL)), "0");
+        assert_eq!(format!("{}", solve_task1::<7>(ACTUAL)), "0");
     }
 
     #[test]
