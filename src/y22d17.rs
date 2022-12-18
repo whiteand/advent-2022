@@ -22,7 +22,7 @@ struct FallingFigure<'i, Dirs>
 where
     Dirs: Iterator<Item = Direction>,
 {
-    chamber: &'i Chamber<'i>,
+    chamber: &'i Chamber,
     figure: &'i Figure,
     direction: &'i mut Dirs,
     position: Vector,
@@ -30,7 +30,7 @@ where
 }
 
 impl<'i, Dirs: Iterator<Item = Direction>> FallingFigure<'i, Dirs> {
-    fn new(chamber: &'i Chamber<'i>, figure: &'i Figure, dirs: &'i mut Dirs) -> Self {
+    fn new(chamber: &'i Chamber, figure: &'i Figure, dirs: &'i mut Dirs) -> Self {
         Self {
             chamber,
             figure,
@@ -98,8 +98,11 @@ pub fn solve_task1<const W: usize, const M: usize>(file_content: &str) -> usize 
     });
     heights.nth(M - 1).unwrap()
 }
-pub fn game<const W: usize, const M: usize>(start: usize, file_content: &str) -> usize {
-    let mut common = start;
+pub fn game<const W: usize, const M: usize>(
+    mut commons: impl Iterator<Item = usize>,
+    file_content: &str,
+) -> usize {
+    let mut common = commons.next().unwrap();
     let figures = get_figures();
     println!("Figures number: {}", figures.len());
     let dirs = parse::parse(file_content).collect::<Vec<_>>();
@@ -125,7 +128,7 @@ pub fn game<const W: usize, const M: usize>(start: usize, file_content: &str) ->
             let diff = x - last_x;
             println!("{i:4}. {x:4} {:2}", x - last_x);
             if should_equal.is_some() && should_equal.unwrap() != diff {
-                common += 1;
+                common = commons.next().unwrap();
                 continue 'c;
             }
             if i > common * 3 {
@@ -152,7 +155,10 @@ mod tests {
     }
     #[test]
     fn test_game() {
-        assert_eq!(format!("{}", game::<7, 2022>(10091, ACTUAL)), "3068");
+        assert_eq!(
+            format!("{}", game::<7, 2022>(10091 * 5 * 7, ACTUAL)),
+            "3068"
+        );
     }
 
     #[test]
