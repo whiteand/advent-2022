@@ -24,6 +24,7 @@ where
     figure: &'i Figure,
     direction: Dirs,
     position: Vector,
+    finished: bool,
 }
 
 impl<'i, Dirs: Iterator<Item = Direction>> FallingFigure<'i, Dirs> {
@@ -33,6 +34,7 @@ impl<'i, Dirs: Iterator<Item = Direction>> FallingFigure<'i, Dirs> {
             figure,
             direction: dirs,
             position: Vector::new(2, (chamber.height() + 2) as isize),
+            finished: false,
         }
     }
 }
@@ -49,12 +51,8 @@ impl<'i, Dirs: Iterator<Item = Direction>> Iterator for FallingFigure<'i, Dirs> 
                 }
                 Right => {
                     let new_possible_pos = self.position.plus(&Vector::new(1, 0));
-                    let can_move = self
-                        .figure
-                        .points
-                        .iter()
-                        .map(|v| v.plus(&new_possible_pos))
-                        .all(|v| v.x < self.chamber.width() as isize);
+                    let can_move =
+                        self.figure.width() + (new_possible_pos.x as usize) < self.chamber.width();
                     if can_move {
                         self.position = new_possible_pos;
                         Some((self.figure, self.position))
@@ -62,7 +60,23 @@ impl<'i, Dirs: Iterator<Item = Direction>> Iterator for FallingFigure<'i, Dirs> 
                         Some((self.figure, self.position))
                     }
                 }
-                Down => todo!(),
+                Down => {
+                    let new_pos = self.position.plus(&Vector::new(0, -1));
+                    let can_move = self
+                        .figure
+                        .points
+                        .iter()
+                        .map(|p| p.plus(&new_pos))
+                        .all(|p| !self.chamber.is_taken(&p));
+
+                    if can_move {
+                        self.position = new_pos;
+                        Some((self.figure, self.position))
+                    } else {
+                        self.finished = true;
+                        None
+                    }
+                }
             },
         }
     }

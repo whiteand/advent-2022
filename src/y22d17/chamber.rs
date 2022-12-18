@@ -44,8 +44,18 @@ impl<'i> Chamber<'i> {
             .iter()
             .flat_map(|pf| pf.figure.points.iter().map(|v| v.plus(&pf.left_bottom)))
     }
+    pub fn is_taken(&self, v: &Vector) -> bool {
+        if v.y > self.height() as isize {
+            return false;
+        }
+        self.taken().any(|p| p.x == v.x && p.y == v.y)
+    }
     pub fn print(&self, moved_figure: Option<(&Figure, Vector)>) {
-        let mut screen = vec![vec!['.'; self.width]; self.height];
+        let height = match &moved_figure {
+            Some((fig, pos)) => self.height.max(fig.height() + pos.y as usize),
+            None => self.height,
+        };
+        let mut screen = vec![vec!['.'; self.width]; height];
 
         for Vector { x, y } in self.taken() {
             screen[y as usize][x as usize] = '#';
