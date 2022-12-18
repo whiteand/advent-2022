@@ -5,6 +5,12 @@ pub enum Direction {
     Down,
 }
 
+impl Direction {
+    pub fn is_down(&self) -> bool {
+        matches!(self, Direction::Down)
+    }
+}
+
 impl std::fmt::Debug for Direction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
