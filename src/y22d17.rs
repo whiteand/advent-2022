@@ -87,10 +87,18 @@ pub fn solve_task1<const W: usize>(file_content: &str) -> usize {
     let dirs = parse::parse(file_content).collect::<Vec<_>>();
     let all_dirs = dirs.iter().cloned().flat_map(|dir| [dir, Down]);
     let chamber = Chamber::new(W);
-    let falling_figure = FallingFigure::new(&chamber, &figures[0], all_dirs);
-    for x in falling_figure {
-        chamber.print(Some(x));
-    }
+    let figures_index_it = {
+        let max_index = figures.len();
+        std::iter::successors(Some(0), move |ind| {
+            let mut res = *ind + 1;
+            if res > max_index {
+                res = 0;
+            }
+            Some(res)
+        })
+    };
+
+    loop {}
 
     0
 }
