@@ -171,22 +171,26 @@ mod tests {
     const INPUT: &str = include_str!("./y22d18/example.txt");
     const ACTUAL: &str = include_str!("../benches/y22d18.txt");
     #[test]
+    #[ignore]
     fn test_task1() {
         assert_eq!(format!("{}", solve_task1(INPUT)), "64");
     }
 
     #[test]
+    #[ignore]
     fn test_task1_actual() {
         assert_eq!(format!("{}", solve_task1(ACTUAL)), "3432");
     }
 
     #[test]
+    #[ignore]
     fn test_task2() {
         assert_eq!(format!("{}", solve_task2(INPUT)), "58");
     }
 
     #[test]
+    #[ignore]
     fn test_task2_actual() {
-        assert_eq!(format!("{}", solve_task2(ACTUAL)), "0");
+        assert_eq!(format!("{}", solve_task2(ACTUAL)), "2042");
     }
 }

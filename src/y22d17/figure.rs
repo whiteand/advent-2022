@@ -7,9 +7,6 @@ pub struct Figure {
 }
 
 impl Figure {
-    pub fn new() -> Self {
-        Figure::default()
-    }
     /// Returns the height of this [`Figure`].
     ///
     /// # Panics

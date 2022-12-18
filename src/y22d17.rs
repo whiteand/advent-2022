@@ -4,12 +4,10 @@ mod figure;
 mod get_figures;
 mod infinite;
 mod parse;
-mod placed_figure;
 mod vector;
 
 use get_figures::get_figures;
 use infinite::infinite;
-use itertools::Itertools;
 
 use self::{
     chamber::Chamber,
