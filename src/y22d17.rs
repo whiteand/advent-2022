@@ -8,6 +8,7 @@ mod placed_figure;
 mod vector;
 
 use get_figures::get_figures;
+use infinite::infinite;
 use itertools::Itertools;
 
 use self::{
@@ -23,13 +24,13 @@ where
 {
     chamber: &'i Chamber<'i>,
     figure: &'i Figure,
-    direction: Dirs,
+    direction: &'i mut Dirs,
     position: Vector,
     finished: bool,
 }
 
 impl<'i, Dirs: Iterator<Item = Direction>> FallingFigure<'i, Dirs> {
-    fn new(chamber: &'i Chamber<'i>, figure: &'i Figure, dirs: Dirs) -> Self {
+    fn new(chamber: &'i Chamber<'i>, figure: &'i Figure, dirs: &'i mut Dirs) -> Self {
         Self {
             chamber,
             figure,
@@ -44,11 +45,17 @@ impl<'i, Dirs: Iterator<Item = Direction>> Iterator for FallingFigure<'i, Dirs> 
     type Item = (&'i Figure, Vector);
 
     fn next(&mut self) -> Option<Self::Item> {
+        if self.finished {
+            return None;
+        }
         match self.direction.next() {
             None => None,
             Some(dir) => match dir {
                 Left => {
-                    todo!("Implement Left")
+                    if self.position.x > 0 {
+                        self.position = self.position.plus(&Vector { x: -1, y: 0 });
+                    }
+                    Some((self.figure, self.position))
                 }
                 Right => {
                     let new_possible_pos = self.position.plus(&Vector::new(1, 0));
@@ -56,12 +63,14 @@ impl<'i, Dirs: Iterator<Item = Direction>> Iterator for FallingFigure<'i, Dirs> 
                         self.figure.width() + (new_possible_pos.x as usize) < self.chamber.width();
                     if can_move {
                         self.position = new_possible_pos;
-                        Some((self.figure, self.position))
-                    } else {
-                        Some((self.figure, self.position))
                     }
+                    Some((self.figure, self.position))
                 }
                 Down => {
+                    if self.position.y <= 0 {
+                        self.finished = true;
+                        return None;
+                    }
                     let new_pos = self.position.plus(&Vector::new(0, -1));
                     let can_move = self
                         .figure
@@ -86,12 +95,27 @@ impl<'i, Dirs: Iterator<Item = Direction>> Iterator for FallingFigure<'i, Dirs> 
 pub fn solve_task1<const W: usize>(file_content: &str) -> usize {
     let figures = get_figures();
     let dirs = parse::parse(file_content).collect::<Vec<_>>();
-    let all_dirs = dirs.iter().cloned().flat_map(|dir| [dir, Down]);
-    let chamber = Chamber::new(W);
+    let mut figures_it = infinite(&figures);
+    let mut dirs = infinite(&dirs);
+    let mut all_dirs = dirs.cloned().flat_map(|dir| [dir, Down]);
+    let mut chamber = Chamber::new(W);
     let mut figures_it = infinite::infinite(&figures);
+    let mut i = 0;
     loop {
         let fig = figures_it.next().unwrap();
-        println!("{fig:?}");
+        let pos = {
+            let (_, pos) = FallingFigure::new(&chamber, fig, &mut all_dirs)
+                .last()
+                .unwrap();
+            pos
+        };
+        chamber.place(fig, pos);
+        // chamber.print(None)
+        i += 1;
+        if i == 2022 {
+            println!("{}", chamber.height());
+            return 0;
+        }
     }
 
     0
