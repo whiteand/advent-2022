@@ -115,17 +115,24 @@ mod tests {
     // COMMON: 1725, addition: 2659
     const ACTUAL: &str = include_str!("../benches/y22d17.txt");
     #[test]
+    #[ignore]
     fn test_task1() {
         assert_eq!(format!("{}", solve_task1::<7>(INPUT, 2022)), "3068");
     }
 
     #[test]
+    #[ignore]
     fn test_task1_actual() {
         assert_eq!(format!("{}", solve_task1::<7>(ACTUAL, 2022)), "3109");
     }
 
     #[test]
+    #[ignore]
     fn test_task2_actual() {
-        assert_eq!(format!("{}", solve_task2::<2022>(ACTUAL)), "0");
+        assert_eq!(format!("{}", solve_task2::<2022>(ACTUAL)), "3109");
+        assert_eq!(
+            format!("{}", solve_task2::<1_000_000_000_000>(ACTUAL)),
+            "1541449275365"
+        );
     }
 }
