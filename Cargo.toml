@@ -10,6 +10,7 @@ criterion = "0.4.0"
 itertools = "0.10.5"
 md-5 = "0.10.5"
 nom = "7.1.1"
+rayon = "1.6.1"
 regex="1"
 
 [[bench]]
@@ -88,4 +89,8 @@ harness = false
 
 [[bench]]
 name = "y22d18"
+harness = false
+
+[[bench]]
+name = "y22d19"
 harness = false
